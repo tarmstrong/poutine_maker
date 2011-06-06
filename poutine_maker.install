@@ -1,0 +1,20 @@
+<?php
+function poutine_maker_field_schema($field) {
+  require_once('poutine_maker.fillings.inc');
+  $columns = array(
+    'name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+    'makedate' => array('type' => 'varchar', 'length' => 30, 'not null' => TRUE),
+  );
+  foreach (poutine_maker_fillings('all') as $filling) {
+    $lowerfilling = str_replace(' ', '_', strtolower($filling));
+    $columns[$filling] = array(
+      'type' => 'int',
+      'length' => 1,
+      'not null' => FALSE,
+    );
+  }
+  return array(
+    'columns' => $columns,
+    'indexes' => array(),
+  );
+}
