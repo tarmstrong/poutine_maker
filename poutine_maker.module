@@ -78,6 +78,8 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
   $fieldset_info = element_info('fieldset');
   $process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
 
+  $required = $instance['required'];
+
   $item =& $items[$delta];
   $element += array(
     '#title' => t('Poutine'),
@@ -87,6 +89,7 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
   $element['name'] = array(
     '#title' => t('Name'),
     '#type' => 'textfield',
+    '#required' => $required,
     '#default_value' => isset($item['name']) ? $item['name'] : '',
   );
   $element['vegetarian'] = array(
@@ -158,13 +161,6 @@ function poutine_maker_field_validate($entity_type, $entity, $field, $instance, 
   $title = "<strong>{$instance['label']}</strong>";
 
   foreach ($items as $delta => $item) {
-    if (empty($item['name'])) {
-      $errors[$field['field_name']][$langcode][$delta][] = array(
-        'error' => 'poutine_maker_invalid_part',
-        'message' => t($title . ': You must provide a name for your poutine creation.'),
-        'error_element' => array('name'),
-      );
-    }
     if (isset($item['sweet_potato']) && isset($item['tofu']) && $item['sweet_potato'] == 1 && $item['tofu'] == 1) {
       $errors[$field['field_name']][$langcode][$delta][] = array(
         'error' => 'poutine_maker_invalid_parts',
