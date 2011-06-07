@@ -158,10 +158,18 @@ function poutine_maker_field_validate($entity_type, $entity, $field, $instance, 
   $title = "<strong>{$instance['label']}</strong>";
 
   foreach ($items as $delta => $item) {
+    if (empty($item['name'])) {
+      $errors[$field['field_name']][$langcode][$delta][] = array(
+        'error' => 'poutine_maker_invalid_part',
+        'message' => t($title . ': You must provide a name for your poutine creation.'),
+        'error_element' => array('name'),
+      );
+    }
     if (isset($item['sweet_potato']) && isset($item['tofu']) && $item['sweet_potato'] == 1 && $item['tofu'] == 1) {
       $errors[$field['field_name']][$langcode][$delta][] = array(
-        'error' => 'poutine_maker_invalid_full',
+        'error' => 'poutine_maker_invalid_parts',
         'message' => t($title . ': Your poutine is not tasty. Please do not mix sweet potato and tofu.'),
+        'error_elements' => array(array('toppings', 'sweet_potato'), array('toppings', 'tofu')),
       );
     }
   }
@@ -174,6 +182,26 @@ function poutine_maker_field_widget_error($element, $error, $form, &$form_state)
   switch($error['error']) {
   case 'poutine_maker_invalid_full':
     form_error($element, $error['message']);
+    break;
+
+  // handle the case where only one part of the widget is in error
+  // this trusts 'invalid_parts' to work properly on arrays of arrays
+  case 'poutine_maker_invalid_part':
+    $error['error_elements'] = array($error['error_element']);
+
+  // handle the case where many parts of the widget are in error.
+  case 'poutine_maker_invalid_parts':
+    $message_delivered = FALSE;
+    foreach ($error['error_elements'] as $el_array) {
+      $el = drupal_array_get_nested_value($element, $el_array);
+      if (!$message_delivered) {
+        form_error($el, $error['message']);
+        $message_delivered = TRUE;
+      }
+      else {
+        form_error($el);
+      }
+    }
     break;
   }
 }
