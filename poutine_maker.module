@@ -137,7 +137,19 @@ function poutine_maker_ignore_parent(&$form, &$form_state, $complete) {
  * Implements hook_field_is_empty().
  */
 function poutine_maker_field_is_empty($item, $field) {
-  return FALSE;
+  $isempty = TRUE;
+  if (empty($item['name'])) {
+    $isempty = FALSE;
+  }
+  if (empty($item['vegetarian'])) {
+    $isempty = FALSE;
+  }
+  foreach (poutine_maker_fillings('machine') as $filling) {
+    if (empty($item[$filling])) {
+      $isempty = FALSE;
+    }
+  }
+  return $isempty;
 }
 
 /**
