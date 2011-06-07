@@ -5,7 +5,7 @@
  * Defines a custom field for constructing a custom poutine.
  */
 
-require_once('poutine_maker.fillings.inc');
+require_once('poutine_maker.toppings.inc');
 
 /**
  * Implements hook_field_info().
@@ -48,7 +48,6 @@ function poutine_maker_field_formatter_view($entity_type, $entity, $field, $inst
  * Helper to render a single formatted entry
  */
 function poutine_maker_format_field($item) {
-  $element = array();
   $element = array(
     '#type' => 'container',
     '#attributes' => array( 'class' => array( 'field-item') ),
@@ -81,7 +80,7 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
 
   $item =& $items[$delta];
   $element += array(
-    '#title' => t('Phone Number'),
+    '#title' => t('Poutine'),
     '#type' => 'fieldset',
     '#delta' => $delta,
   );
@@ -95,22 +94,22 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
     '#type' => 'checkbox',
     '#default_value' => isset($item['vegetarian']) ? $item['vegetarian'] : '',
   );
-  $element['fillings'] = array(
-    '#title' => t('Fillings'),
+  $element['toppings'] = array(
+    '#title' => t('Toppings'),
     '#type' => 'fieldset',
     '#process' => $process,
   );
-  foreach (poutine_maker_fillings('all') as $filling) {
-    $filling_machine = strtolower($filling);
-    $element['fillings'][$filling_machine] = array(
-      '#title' => t($filling),
+  foreach (poutine_maker_toppings('all') as $topping) {
+    $topping_machine = _poutine_maker_make_machine_name($topping);
+    $element['toppings'][$topping_machine] = array(
+      '#title' => t($topping),
       '#type' => 'checkbox',
-      '#default_value' => isset($item[$filling_machine]) ? $item[$filling_machine] : '',
+      '#default_value' => isset($item[$topping_machine]) ? $item[$topping_machine] : '',
     );
   }
-  foreach (poutine_maker_fillings('meat') as $nonvegetarian_filling) {
-    $filling_machine = strtolower($nonvegetarian_filling);
-    $element['fillings'][$filling_machine]['#states'] = array(
+  foreach (poutine_maker_toppings('meat') as $nonvegetarian_topping) {
+    $topping_machine = _poutine_maker_make_machine_name($nonvegetarian_topping);
+    $element['toppings'][$topping_machine]['#states'] = array(
       'visible' => array(
         _poutine_maker_make_jquery_selector($field_name, $langcode, $delta, 'vegetarian') =>
           array('checked' => FALSE),
@@ -144,8 +143,8 @@ function poutine_maker_field_is_empty($item, $field) {
   if (empty($item['vegetarian'])) {
     $isempty = FALSE;
   }
-  foreach (poutine_maker_fillings('machine') as $filling) {
-    if (empty($item[$filling])) {
+  foreach (poutine_maker_toppings('machine') as $topping) {
+    if (empty($item[$topping])) {
       $isempty = FALSE;
     }
   }
@@ -159,12 +158,12 @@ function poutine_maker_field_validate($entity_type, $entity, $field, $instance, 
   $title = "<strong>{$instance['label']}</strong>";
 
   foreach ($items as $delta => $item) {
-    /*
-    $errors[$field['field_name']][$langcode][$delta][] = array(
-      'error' => 'poutine_maker_invalid_full',
-      'message' => t($title . ': Your poutine is invalid.'),
-    );
-     */
+    if (isset($item['sweet_potato']) && isset($item['tofu']) && $item['sweet_potato'] == 1 && $item['tofu'] == 1) {
+      $errors[$field['field_name']][$langcode][$delta][] = array(
+        'error' => 'poutine_maker_invalid_full',
+        'message' => t($title . ': Your poutine is not tasty. Please do not mix sweet potato and tofu.'),
+      );
+    }
   }
 }
 

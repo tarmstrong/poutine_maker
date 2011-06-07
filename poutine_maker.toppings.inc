@@ -1,7 +1,7 @@
 <?php
 
-function poutine_maker_fillings($filter=NULL) {
-  $fillings = array(
+function poutine_maker_toppings($filter=NULL) {
+  $toppings = array(
     'meat' => array(
       'Chicken', 'Beef', 'Pork', 'Turkey',
     ),
@@ -12,13 +12,13 @@ function poutine_maker_fillings($filter=NULL) {
   );
   switch ($filter) {
   case NULL:
-    return $fillings;
+    return $toppings;
   case 'all':
-    return array_merge($fillings['meat'], $fillings['veg']);
+    return array_merge($toppings['meat'], $toppings['veg']);
   case 'machine':
-    return array_map('_poutine_maker_make_machine_name', poutine_maker_fillings('all'));
+    return array_map('_poutine_maker_make_machine_name', poutine_maker_toppings('all'));
   default:
-    return $fillings[$filter];
+    return $toppings[$filter];
   }
 }
 

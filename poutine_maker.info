@@ -2,6 +2,6 @@ name="Tavish's Poutine Maker"
 description="Custom field for custom poutines"
 core=7.x
 package="Tavish"
-files[] = poutine_maker.fillings.inc
+files[] = poutine_maker.toppings.inc
 files[] = poutine_maker.module
 files[] = poutine_maker.install
