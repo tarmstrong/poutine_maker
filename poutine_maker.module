@@ -9,6 +9,12 @@ require_once('poutine_maker.toppings.inc');
 
 /**
  * Implements hook_field_info().
+ *
+ * Here we tell Drupal about our custom fields. In this case
+ * we only have one. Its machine-readable name is 'poutine_maker_poutine_maker'
+ * because the convention is 'modulename_fieldname'.
+ *
+ * We also define the machine names of the widget and the formatter.
  */
 function poutine_maker_field_info() {
   return array(
@@ -23,6 +29,11 @@ function poutine_maker_field_info() {
 
 /**
  * Implements hook_field_formatter_info().
+ *
+ * Here we tell Drupal about our custom formatters. In this
+ * case we only have one. Note that our formatter works on
+ * the field type 'poutine_maker_poutine_maker', which is
+ * the machine-readable name we defined in poutine_maker_field_info().
  */
 function poutine_maker_field_formatter_info() {
   return array(
@@ -35,6 +46,9 @@ function poutine_maker_field_formatter_info() {
 
 /**
  * Implements hook_field_formatter_view().
+ *
+ * This function gives Drupal a structured array, which
+ * defines how the data stored in the field should be rendered.
  */
 function poutine_maker_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
@@ -50,7 +64,7 @@ function poutine_maker_field_formatter_view($entity_type, $entity, $field, $inst
 function poutine_maker_format_field($item) {
   $element = array(
     '#type' => 'container',
-    '#attributes' => array( 'class' => array( 'field-item') ),
+    '#attributes' => array('class' => array('field-item')),
     'text' => array(
       '#markup' => 'poutine_maker rendering not implemented',
     ),
@@ -60,6 +74,11 @@ function poutine_maker_format_field($item) {
 
 /**
  * Implements hook_field_widget_info().
+ *
+ * Here we tell Drupal about our custom widgets. In this
+ * case we only have one. As with poutine_maker_field_formatter_info(),
+ * we tell Drupal which fields our widget works with (in this case, just
+ * 'poutine_maker_poutine_maker').
  */
 function poutine_maker_field_widget_info() {
   return array(
@@ -72,24 +91,52 @@ function poutine_maker_field_widget_info() {
 
 /**
  * Implements hook_field_widget_form().
+ *
+ * Here we define a form element that the user inputs data
+ * into. If we have a complex custom field, we can have many sub-elements
+ * organized into fieldsets.
  */
 function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  // $field_name is the name of the field instance. This is the
+  // name that the administrator gives the field instance when
+  // attaching it to an entity.
   $field_name = $instance['field_name'];
+
+  // $process is a callback that we will attach to fieldsets in order
+  // to 'flatten' the form values. This is so we can store
+  // nested values in a 'flat' DB table.
   $fieldset_info = element_info('fieldset');
   $process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
 
+  // Is this field required in *this* instance?
+  // If you set '#required' => TRUE on an element
+  // in this function, it will make the user enter a value
+  // even if the field itself is not required -- even
+  // on a configuration page.
   $required = $instance['required'];
 
+  // $item is where the current saved values are stored
   $item =& $items[$delta];
+
+  // Defining a fieldset. Use $delta
+  // because this may be a multi-value field.
+  // (e.g. a 'field_poutine' instance could
+  // let the user enter many poutines)
   $element += array(
     '#title' => t('Poutine'),
     '#type' => 'fieldset',
     '#delta' => $delta,
   );
+
+  // Array keys in $element correspond roughly
+  // to array keys in $item, which correspond
+  // roughly to columns in the database table.
   $element['name'] = array(
     '#title' => t('Name'),
     '#type' => 'textfield',
     '#required' => $required,
+    // use #default_value to prepopulate the element
+    // with the current saved value
     '#default_value' => isset($item['name']) ? $item['name'] : '',
   );
   $element['vegetarian'] = array(
@@ -102,6 +149,9 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
     '#type' => 'fieldset',
     '#process' => $process,
   );
+
+  // Populate the 'toppings' fieldset with a bunch of
+  // tasty toppings. Each one is a fieldset.
   foreach (poutine_maker_toppings('all') as $topping) {
     $topping_machine = _poutine_maker_make_machine_name($topping);
     $element['toppings'][$topping_machine] = array(
@@ -110,6 +160,9 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
       '#default_value' => isset($item[$topping_machine]) ? $item[$topping_machine] : '',
     );
   }
+
+  // Don't show the meat toppings if the user selects the
+  // morally superior 'vegetarian' checkbox
   foreach (poutine_maker_toppings('meat') as $nonvegetarian_topping) {
     $topping_machine = _poutine_maker_make_machine_name($nonvegetarian_topping);
     $element['toppings'][$topping_machine]['#states'] = array(
@@ -129,6 +182,9 @@ function _poutine_maker_make_jquery_selector($field_name, $langcode, $delta, $it
 
 /**
  * Process callback to remove one level of parentage
+ *
+ * poutine_maker_ignore_parent() causes the form values to be 'flattened' before being saved into
+ * the database table.
  */
 function poutine_maker_ignore_parent(&$form, &$form_state, $complete) {
   array_pop($form['#parents']);
@@ -137,6 +193,10 @@ function poutine_maker_ignore_parent(&$form, &$form_state, $complete) {
 
 /**
  * Implements hook_field_is_empty().
+ *
+ * poutine_maker_field_is_empty() lets Drupal know whether or not to process input
+ * at all; if the field is empty, it won't bother validating
+ * or saving the values.
  */
 function poutine_maker_field_is_empty($item, $field) {
   $isempty = TRUE;
@@ -156,6 +216,9 @@ function poutine_maker_field_is_empty($item, $field) {
 
 /**
  * Implements hook_field_validate().
+ *
+ * poutine_maker_field_validate() sets an $errors array with information about
+ * the errors detected in the field input.
  */
 function poutine_maker_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   $title = "<strong>{$instance['label']}</strong>";
@@ -173,6 +236,11 @@ function poutine_maker_field_validate($entity_type, $entity, $field, $instance, 
 
 /**
  * Implements hook_field_widget_error().
+ *
+ * poutine_maker_field_widget_error() takes the errors set in poutine_maker_field_validate()
+ * and tells Drupal how to notify the user of the error. For example, this implementation
+ * calls form_error() with each element passed in the $error['error_elements'] array, so
+ * we can identify a problem with several elements in our field (e.g. tofu and sweet potato).
  */
 function poutine_maker_field_widget_error($element, $error, $form, &$form_state) {
   switch($error['error']) {
