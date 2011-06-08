@@ -1,12 +1,12 @@
 <?php
 function poutine_maker_field_schema($field) {
-  require_once('poutine_maker.toppings.inc');
+  module_load_include('inc', 'poutine_maker', 'poutine_maker.toppings');
   $columns = array(
     'name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
     'vegetarian' => array('type' => 'int', 'length' => 1, 'not null' => FALSE),
   );
-  foreach (poutine_maker_toppings('machine') as $topping) {
-    $columns[$topping] = array(
+  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
+    $columns[$topping_machine] = array(
       'type' => 'int',
       'length' => 1,
       'not null' => FALSE,

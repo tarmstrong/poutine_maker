@@ -5,7 +5,7 @@
  * Defines a custom field for constructing a custom poutine.
  */
 
-require_once('poutine_maker.toppings.inc');
+module_load_include('inc', 'poutine_maker', 'poutine_maker.toppings');
 
 /**
  * Implements hook_field_info().
@@ -92,6 +92,8 @@ function poutine_maker_field_widget_info() {
 /**
  * Implements hook_field_widget_form().
  *
+ * http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7
+ * 
  * Here we define a form element that the user inputs data
  * into. If we have a complex custom field, we can have many sub-elements
  * organized into fieldsets.
@@ -108,24 +110,21 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
   $fieldset_info = element_info('fieldset');
   $process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
 
-  // Is this field required in *this* instance?
-  // If you set '#required' => TRUE on an element
-  // in this function, it will make the user enter a value
-  // even if the field itself is not required -- even
-  // on a configuration page.
-  $required = $instance['required'];
+  // Is this field instance required?
+  // We can use this $required value to make sub-elements of the
+  // widget form required.
+  $required = $element['#required'];
 
   // $item is where the current saved values are stored
   $item =& $items[$delta];
 
-  // Defining a fieldset. Use $delta
-  // because this may be a multi-value field.
-  // (e.g. a 'field_poutine' instance could
-  // let the user enter many poutines)
+  // $element is already populated with #title, #description, #delta,
+  // #required, #field_name, etc.
+  //
+  // In this example, $element is a fieldset, but it could be any element
+  // type (textfield, checkbox, etc.)
   $element += array(
-    '#title' => t('Poutine'),
     '#type' => 'fieldset',
-    '#delta' => $delta,
   );
 
   // Array keys in $element correspond roughly
@@ -139,21 +138,52 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
     // with the current saved value
     '#default_value' => isset($item['name']) ? $item['name'] : '',
   );
-  $element['vegetarian'] = array(
-    '#title' => t('Vegetarian'),
-    '#type' => 'checkbox',
-    '#default_value' => isset($item['vegetarian']) ? $item['vegetarian'] : '',
-  );
+
+  // Make sure we aren't a vegetarian poutine restaurant before showing the meat options
+  $allow_meat = isset($instance['settings']['allow_meat']) ? $instance['settings']['allow_meat'] : TRUE;
+
+  if ($allow_meat) {
+    $element['vegetarian'] = array(
+      '#title' => t('Vegetarian'),
+      '#type' => 'checkbox',
+      '#default_value' => isset($item['vegetarian']) ? $item['vegetarian'] : '',
+    );
+
+    // Have a separate fieldset for meat.
+    $element['meat'] = array(
+      '#title' => t('Meat'),
+      '#type' => 'fieldset',
+      '#process' => $process,
+
+      // the meat fieldset should only be visible if
+      // the vegetarian checkbox is not checked.
+      '#states' => array(
+        'visible' => array(
+          _poutine_maker_make_jquery_selector($field_name, $langcode, $delta, 'vegetarian') =>
+            array('checked' => FALSE),
+        ),
+      ),
+    );
+
+    // Create a checkbox item for each meat on the menu
+    foreach (poutine_maker_toppings_meat() as $meat_machine=>$meat) {
+      $element['meat'][$meat_machine] = array(
+        '#title' => t($meat),
+        '#type' => 'checkbox',
+        '#default_value' => isset($item[$meat_machine]) ? $item[$meat_machine] : '',
+      );
+    }
+  }
+
+  // Have a separate fieldset for non-meat toppings
   $element['toppings'] = array(
     '#title' => t('Toppings'),
     '#type' => 'fieldset',
     '#process' => $process,
   );
 
-  // Populate the 'toppings' fieldset with a bunch of
-  // tasty toppings. Each one is a fieldset.
-  foreach (poutine_maker_toppings('all') as $topping) {
-    $topping_machine = _poutine_maker_make_machine_name($topping);
+  // Create a checkbox item for each topping on the menu
+  foreach (poutine_maker_toppings_veg() as $topping_machine=>$topping) {
     $element['toppings'][$topping_machine] = array(
       '#title' => t($topping),
       '#type' => 'checkbox',
@@ -161,21 +191,15 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
     );
   }
 
-  // Don't show the meat toppings if the user selects the
-  // morally superior 'vegetarian' checkbox
-  foreach (poutine_maker_toppings('meat') as $nonvegetarian_topping) {
-    $topping_machine = _poutine_maker_make_machine_name($nonvegetarian_topping);
-    $element['toppings'][$topping_machine]['#states'] = array(
-      'visible' => array(
-        _poutine_maker_make_jquery_selector($field_name, $langcode, $delta, 'vegetarian') =>
-          array('checked' => FALSE),
-      ),
-    );
-  }
   return $element;
 }
 
+/**
+ * _poutine_maker_make_jquery_selector() returns a jQuery selector that Drupal will use
+ * to test for #states conditions.
+ */
 function _poutine_maker_make_jquery_selector($field_name, $langcode, $delta, $item_name) {
+  $lastpart = implode('][', array($langcode, $delta, $item_name));
   return ':input[name="' . $field_name . '[' . $langcode . '][' . $delta . '][' . $item_name . ']"], ' .
     ':input[name$="[' . $field_name . '][' . $langcode . '][' . $delta . '][' . $item_name . ']"]';
 }
@@ -199,19 +223,19 @@ function poutine_maker_ignore_parent(&$form, &$form_state, $complete) {
  * or saving the values.
  */
 function poutine_maker_field_is_empty($item, $field) {
-  $isempty = TRUE;
-  if (empty($item['name'])) {
-    $isempty = FALSE;
-  }
-  if (empty($item['vegetarian'])) {
-    $isempty = FALSE;
-  }
-  foreach (poutine_maker_toppings('machine') as $topping) {
-    if (empty($item[$topping])) {
-      $isempty = FALSE;
+  $has_stuff = FALSE;
+  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
+    if (isset($item[$topping_machine]) && $item[$topping_machine] == 1) {
+      $has_stuff = TRUE;
     }
   }
-  return $isempty;
+  if (!empty($item['name'])) {
+    $has_stuff = TRUE;
+  }
+  if (isset($item['vegetarian']) && $item['vegetarian'] == 1) {
+    $has_stuff = TRUE;
+  }
+  return !$has_stuff;
 }
 
 /**
@@ -221,14 +245,11 @@ function poutine_maker_field_is_empty($item, $field) {
  * the errors detected in the field input.
  */
 function poutine_maker_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
-  $title = "<strong>{$instance['label']}</strong>";
-
   foreach ($items as $delta => $item) {
     if (isset($item['sweet_potato']) && isset($item['tofu']) && $item['sweet_potato'] == 1 && $item['tofu'] == 1) {
       $errors[$field['field_name']][$langcode][$delta][] = array(
-        'error' => 'poutine_maker_invalid_parts',
-        'message' => t($title . ': Your poutine is not tasty. Please do not mix sweet potato and tofu.'),
-        'error_elements' => array(array('toppings', 'sweet_potato'), array('toppings', 'tofu')),
+        'error' => 'poutine_maker_invalid_full',
+        'message' => t('%title: Your poutine is not tasty. Please do not mix sweet potato and tofu.', array('%title' => $instance['label'])),
       );
     }
   }
@@ -243,29 +264,28 @@ function poutine_maker_field_validate($entity_type, $entity, $field, $instance, 
  * we can identify a problem with several elements in our field (e.g. tofu and sweet potato).
  */
 function poutine_maker_field_widget_error($element, $error, $form, &$form_state) {
-  switch($error['error']) {
+  switch ($error['error']) {
+  // Handle the error that was set in poutine_maker_field_validate()
   case 'poutine_maker_invalid_full':
     form_error($element, $error['message']);
     break;
-
-  // handle the case where only one part of the widget is in error
-  // this trusts 'invalid_parts' to work properly on arrays of arrays
-  case 'poutine_maker_invalid_part':
-    $error['error_elements'] = array($error['error_element']);
-
-  // handle the case where many parts of the widget are in error.
-  case 'poutine_maker_invalid_parts':
-    $message_delivered = FALSE;
-    foreach ($error['error_elements'] as $el_array) {
-      $el = drupal_array_get_nested_value($element, $el_array);
-      if (!$message_delivered) {
-        form_error($el, $error['message']);
-        $message_delivered = TRUE;
-      }
-      else {
-        form_error($el);
-      }
-    }
-    break;
   }
+}
+
+/**
+ * Implements hook_field_instance_settings_form().
+ *
+ * poutine_maker_field_instance_settings_form() modifies the instance settings
+ * form to include a checkbox that allows the administrator to choose whether
+ * to even give the option of choosing meat (they might want to open a vegetarian
+ * poutine restaurant).
+ */
+function poutine_maker_field_instance_settings_form($field, $instance) {
+  $settings = $instance['settings'];
+  $form['allow_meat'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow meat on the menu.'),
+    '#default_value' => isset($settings['allow_meat']) ? $settings['allow_meat'] : 0,
+  );
+  return $form;
 }
