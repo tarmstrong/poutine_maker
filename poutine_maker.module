@@ -59,14 +59,63 @@ function poutine_maker_field_formatter_view($entity_type, $entity, $field, $inst
 }
 
 /**
- * Helper to render a single formatted entry
+ * Helper to render a single formatted entry. Returns
+ * a structured array that will display the data stored in
+ * $item.
  */
 function poutine_maker_format_field($item) {
   $element = array(
     '#type' => 'container',
-    '#attributes' => array('class' => array('field-item')),
-    'text' => array(
-      '#markup' => 'poutine_maker rendering not implemented',
+    '#attributes' => array( 'class' => array( 'field-item') ),
+  );
+  $element['name'] = array(
+    'label' => array(
+      '#type' => 'container',
+      '#attributes' => array( 'class' => array( 'field-label' )),
+      'text' => array(
+        '#markup' => t('Name'),
+      ),
+    ),
+    'item' => array(
+      '#type' => 'container',
+      '#attributes' => array( 'class' => array( 'field-item') ),
+      'text' => array(
+        '#markup' => $item['name'],
+      ),
+    ),
+  );
+  if ($item['vegetarian']) {
+    $element['vegetarian'] = array(
+      'item' => array(
+        '#type' => 'container',
+        '#attributes' => array( 'class' => array( 'field-item') ),
+        'text' => array(
+          '#markup' => t('<strong>This is a vegetarian poutine</strong>'),
+        ),
+      ),
+    );
+  }
+  $toppings_list = array();
+  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
+    if ($item[$topping_machine] == 1) {
+      $toppings_list[] = t($topping);
+    }
+  }
+  $toppings_rendered_list = implode(', ', $toppings_list);
+  $element['toppings'] = array(
+    'label' => array(
+      '#type' => 'container',
+      '#attributes' => array( 'class' => array( 'field-label' )),
+      'text' => array(
+        '#markup' => t('Ingredients'),
+      ),
+    ),
+    'item' => array(
+      '#type' => 'container',
+      '#attributes' => array( 'class' => array( 'field-item') ),
+      'text' => array(
+        '#markup' => $toppings_rendered_list,
+      ),
     ),
   );
   return $element;
