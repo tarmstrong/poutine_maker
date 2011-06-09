@@ -11,18 +11,18 @@ module_load_include('inc', 'poutine_maker', 'poutine_maker.toppings');
  * Implements hook_field_info().
  *
  * Here we tell Drupal about our custom fields. In this case
- * we only have one. Its machine-readable name is 'poutine_maker_poutine_maker'
+ * we only have one. Its machine-readable name is 'poutine_maker_poutine'
  * because the convention is 'modulename_fieldname'.
  *
  * We also define the machine names of the widget and the formatter.
  */
 function poutine_maker_field_info() {
   return array(
-    'poutine_maker_poutine_maker' => array(
+    'poutine_maker_poutine' => array(
       'label' => t('Custom Poutine'),
       'description' => t('Custom Poutine Field'),
-      'default_widget' => 'poutine_maker_poutine_maker_in',
-      'default_formatter' => 'poutine_maker_poutine_maker_out',
+      'default_widget' => 'poutine_maker_poutine_widget',
+      'default_formatter' => 'poutine_maker_poutine_formatter',
     ),
   );
 }
@@ -33,13 +33,13 @@ function poutine_maker_field_info() {
  * Here we tell Drupal about our custom widgets. In this
  * case we only have one. As with poutine_maker_field_formatter_info(),
  * we tell Drupal which fields our widget works with (in this case, just
- * 'poutine_maker_poutine_maker').
+ * 'poutine_maker_poutine').
  */
 function poutine_maker_field_widget_info() {
   return array(
-    'poutine_maker_poutine_maker_in' => array(
+    'poutine_maker_poutine_widget' => array(
       'label' => t('Default'),
-      'field types' => array('poutine_maker_poutine_maker'),
+      'field types' => array('poutine_maker_poutine'),
     ),
   );
 }
@@ -250,14 +250,14 @@ function poutine_maker_field_instance_settings_form($field, $instance) {
  *
  * Here we tell Drupal about our custom formatters. In this
  * case we only have one. Note that our formatter works on
- * the field type 'poutine_maker_poutine_maker', which is
+ * the field type 'poutine_maker_poutine', which is
  * the machine-readable name we defined in poutine_maker_field_info().
  */
 function poutine_maker_field_formatter_info() {
   return array(
-    'poutine_maker_poutine_maker_out' => array(
+    'poutine_maker_poutine_formatter' => array(
       'label' => t('Default'),
-      'field types' => array('poutine_maker_poutine_maker'),
+      'field types' => array('poutine_maker_poutine'),
     ),
   );
 }
