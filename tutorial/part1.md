@@ -8,6 +8,7 @@ The top two reasons for wanting to make a custom field are:
 
 1. You want to customize the way a user inputs their data. This is done with a **custom field widget**.
 2. You want to customize the way a field is displayed. This is done with a **custom field formatter**.
+3. You want a complex multi-value fieldset. Currently there is no way to do this in Drupal 7. By defining a custom field and setting the "Number of values" setting to "Unlimited", we can use **one field to store many complex values**.
 
 <aside>
 The `field_example` module is, as the name implies, a great example of how custom fields are defined.
@@ -90,9 +91,17 @@ Also note that I am specifically telling Drupal that my widget can work with the
 
 This is the form element I want customers to use to create custom poutines:
 
-![Custom poutine form](poutine%20maker%20full.png)
+![Custom poutine form](multipoutine.png)
 
-I did this by implementing `hook_field_widget_form()`. Let's take a look at the function signature of my implementation, `poutine_maker_field_widget_form()`:
+There are three important things to notice about this screenshot:
+
+1. The entire field ("Poutine Maker With Meat") is required, but only the "name" sub-element is required. I will explain how this works in a bit.
+2. The second poutine-item doesn't have a "Meat" fieldset. This is done with [\#states][states]. I will cover \#states in the next part of this tutorial.
+3. There are two poutine items! This is done by setting the *number of values* to "Unlimited" on the field instance settings page. Now this field can store as many poutines in one field as we like.
+
+[states]: http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7#states
+
+I implemented the widget shown in the above screenshot by implementing `hook_field_widget_form()`. Let's take a look at the function signature of my implementation, `poutine_maker_field_widget_form()`:
 
     function poutine_maker_field_widget_form(&$form,
                                              &$form_state,
@@ -242,7 +251,7 @@ Once you click "Save", it will ask you to configure your field:
 
 ![Configure It](configure%20field.png)
 
-Now when I add a new Basic Page (Content -> Add content -> Basic Page), my field is attached to the form:
+Now when I add a new Basic Page (Content -> Add content -> Basic Page), my field is attached to the form (this time I have set *number of items* to 1):
 
 ![Poutine Maker in Action](create%20basic%20page%20with%20poutine.png)
 
@@ -293,3 +302,11 @@ To create your own custom field:
 Next I will cover validation and formatting of custom fields. This is what you need to do to make sure your field stores only valid data, and to display the stored data in a useful fashion.
 
 See [poutine_maker][poutine_maker] on GitHub for a full example. And, as always, let me know if you have questions and I'll try my best to answer them. Even if you don't have questions, let us know what you're using custom fields for!
+
+## Additional Resources
+
+* The [Examples Module](http://drupal.org/project/examples)
+* [Field API](http://api.drupal.org/api/drupal/modules--field--field.module/group/field/7)
+* [Form API](http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7)
+* [Pro Drupal Development](http://www.drupalbook.com/)
+* [Drupal 7 Module Development](https://www.packtpub.com/drupal-7-module-development/book)

@@ -27,6 +27,7 @@
 <ol>
 <li>You want to customize the way a user inputs their data. This is done with a <strong>custom field widget</strong>.</li>
 <li>You want to customize the way a field is displayed. This is done with a <strong>custom field formatter</strong>.</li>
+<li>You want a complex multi-value fieldset. Currently there is no way to do this in Drupal 7. By defining a custom field and setting the "Number of values" setting to "Unlimited", we can use <strong>one field to store many complex values</strong>.</li>
 </ol>
 
 <p><aside>
@@ -107,9 +108,17 @@ You can define many custom fields in a single <code>hook_field_info()</code> dec
 
 <p>This is the form element I want customers to use to create custom poutines:</p>
 
-<p><img src="poutine%20maker%20full.png" alt="Custom poutine form" title="" /></p>
+<p><img src="multipoutine.png" alt="Custom poutine form" title="" /></p>
 
-<p>I did this by implementing <code>hook_field_widget_form()</code>. Let's take a look at the function signature of my implementation, <code>poutine_maker_field_widget_form()</code>:</p>
+<p>There are three important things to notice about this screenshot:</p>
+
+<ol>
+<li>The entire field ("Poutine Maker With Meat") is required, but only the "name" sub-element is required. I will explain how this works in a bit.</li>
+<li>The second poutine-item doesn't have a "Meat" fieldset. This is done with <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7#states">#states</a>. I will cover #states in the next part of this tutorial.</li>
+<li>There are two poutine items! This is done by setting the <em>number of values</em> to "Unlimited" on the field instance settings page. Now this field can store as many poutines in one field as we like.</li>
+</ol>
+
+<p>I implemented the widget shown in the above screenshot by implementing <code>hook_field_widget_form()</code>. Let's take a look at the function signature of my implementation, <code>poutine_maker_field_widget_form()</code>:</p>
 
 <pre><code>function poutine_maker_field_widget_form(&amp;$form,
                                          &amp;$form_state,
@@ -217,7 +226,7 @@ foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
 
 <h2>Step 4: Tell Drupal how to store your values with <code>hook_field_schema()</code></h2>
 
-<p><code>hook_field_schema()</code> defines a table specifically for saving your field values. If you aren't already familiar with the Schema API, you can learn more about it <a href="http://drupal.org/developing/api/schema">here</a>.</p>
+<p><code>hook_field_schema()</code> defines table columns specifically for saving your field values. Whereas <code>hook_schema()</code> will define a table and its fields, <code>hook_field_schema()</code> will only need to define its columns, since the Field API will make a table for <em>each field instance</em> of a custom field. If you aren't already familiar with the Schema API, you can learn more about it <a href="http://drupal.org/developing/api/schema">here</a>.</p>
 
 <p>In <code>poutine_maker.install</code>:</p>
 
@@ -258,7 +267,7 @@ foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
 
 <p><img src="configure%20field.png" alt="Configure It" title="" /></p>
 
-<p>Now when I add a new Basic Page (Content -> Add content -> Basic Page), my field is attached to the form:</p>
+<p>Now when I add a new Basic Page (Content -> Add content -> Basic Page), my field is attached to the form (this time I have set <em>number of items</em> to 1):</p>
 
 <p><img src="create%20basic%20page%20with%20poutine.png" alt="Poutine Maker in Action" title="" /></p>
 
@@ -313,3 +322,13 @@ $element['meat'] = array(
 <p>Next I will cover validation and formatting of custom fields. This is what you need to do to make sure your field stores only valid data, and to display the stored data in a useful fashion.</p>
 
 <p>See <a href="https://github.com/tarmstrong/poutine_maker">poutine_maker</a> on GitHub for a full example. And, as always, let me know if you have questions and I'll try my best to answer them. Even if you don't have questions, let us know what you're using custom fields for!</p>
+
+<h2>Additional Resources</h2>
+
+<ul>
+<li>The <a href="http://drupal.org/project/examples">Examples Module</a></li>
+<li><a href="http://api.drupal.org/api/drupal/modules--field--field.module/group/field/7">Field API</a></li>
+<li><a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7">Form API</a></li>
+<li><a href="http://www.drupalbook.com/">Pro Drupal Development</a></li>
+<li><a href="https://www.packtpub.com/drupal-7-module-development/book">Drupal 7 Module Development</a></li>
+</ul>
