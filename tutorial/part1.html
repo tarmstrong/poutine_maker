@@ -1,20 +1,3 @@
-<!DOCTYPE html>
-<head><title>part 1</title></head>
-<style>
-  body {
-    width: 585px;
-    font-family: Arial;
-    font-size: 0.875em;
-    line-height: 1.286em;
-  }
-  h1 {
-    line-height: 2.086em;
-  }
-  h1 {
-    line-height: 1.286em;
-  }
-</style>
-<body>
 <h1>Poutine Maker: An Introduction to the Field API in Drupal 7</h1>
 
 <p>The power of Drupal stems from its willingness to be customized. In a recent project, we needed a way to provide complex fields with custom widgets and formatters unavailable in core or contributed modules. Drupal 7's Field API, however, provides the hooks needed to make just about any field we wanted.</p>
@@ -56,7 +39,7 @@ The <code>field_example</code> module is, as the name implies, a great example o
 
 <h2>Step 1: Define your field type with <code>hook_field_info()</code></h2>
 
-<p>First you need to tell Drupal that you are defining your own field type. You can also define new widgets and formatters for existing field types, but in this example we want to store a Poutine creation, which is not an existing field type (well, it might be in contrib...)</p>
+<p>First you need to tell Drupal that you are defining your own field type. You can also define new widgets and formatters for existing field types, but in this example we want to store a Poutine creation, which is not an existing field type.</p>
 
 <p>Here is how you define a field type:</p>
 
@@ -77,7 +60,7 @@ The <code>field_example</code> module is, as the name implies, a great example o
 <p>Pay close attention to the <code>default_widget</code> and <code>default_formatter</code> values. We will use these machine-readable widget and formatter names throughout the module.</p>
 
 <p><aside>
-You can define many custom fields in a single <code>hook_field_info()</code> declaration. An elaborate example of this is <a href="http://api.lullabot.com/date_field_info/7">date_field_info()</a> in <code>date.field.inc</code> of the <a href="http://drupal.org/project/date">Date</a> module.
+You can define many custom fields in a single <code>hook_field_info()</code> declaration. An elaborate example of this is <a href="http://api.lullabot.com/date_field_info/7">date_field_info()</a> in the <a href="http://drupal.org/project/date">Date</a> module.
 </aside></p>
 
 <h2>Step 2: Tell Drupal about your field widget with <code>hook_field_widget_info()</code></h2>
@@ -100,7 +83,7 @@ You can define many custom fields in a single <code>hook_field_info()</code> dec
 
 <p>Remember <code>poutine_maker_poutine_widget</code>? That's the full machine-readable widget name. The convention is <code>&lt;modulename&gt;_&lt;fieldname&gt;_&lt;widgetname&gt;</code>. In this case, I've named my widget <code>widget</code>; I only intend to make one widget for this field, and I don't have a good way to describe it. However, if you can describe your widget, do so: <code>poutine_maker_poutine_threetext</code> would be a good name for my widget if it consisted of three text fields.</p>
 
-<p>Also note that I am specifically telling Drupal that my widget can work with the <code>poutine_maker_poutine</code> field type. Here is where you could specify other field types your widget works with.</p>
+<p>Also note that I am specifically telling Drupal that my widget can work with the <code>poutine_maker_poutine</code> field type. Here is where you could specify other field types your widget works with, like <code>text</code> or <code>datetime</code>.</p>
 
 <h2>Step 3: Tell Drupal how to display your widget with <code>hook_field_widget_form()</code></h2>
 
@@ -170,6 +153,8 @@ $element['meat'] = array(
 );
 
 // Create a checkbox item for each meat on the menu
+// poutine_maker_toppings_meat() returns an associative array of all the meats I want available
+// It is in a separate file that I have not included in this tutorial
 foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
   $element['meat'][$meat_machine] = array(
     '#title' =&gt; t($meat),
@@ -185,39 +170,50 @@ foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
 
 <h2>Step 3: Tell Drupal how to tell when your field is empty with <code>hook_field_is_empty()</code></h2>
 
-<p><code>hook_field_is_empty()</code> lets Drupal know whether or not to bother saving or validating submitted values:</p>
+<p><code>hook_field_is_empty()</code> lets Drupal know whether or not to bother saving or validating submitted values. In the following example, I first check to see if any of the checkboxes have been checked off, and then check to see if they have entered a name. If any of these conditions are satisfied, I consider the field non-empty (though not necessarily <em>full</em>).</p>
 
 <pre><code>function poutine_maker_field_is_empty($item, $field) {
   $has_stuff = FALSE;
+
+  // first see if any of the topping checkboxes have been checked off
   foreach (poutine_maker_toppings() as $topping_machine=&gt;$topping) {
     if (isset($item[$topping_machine]) &amp;&amp; $item[$topping_machine] == 1) {
       $has_stuff = TRUE;
     }
   }
-  if (!empty($item['name'])) {
+
+  // has the user checked off the 'vegetarian' checkbox?
+  if (isset($item['vegetarian']) &amp;&amp; $item['vegetarian'] == 1) {
     $has_stuff = TRUE;
   }
-  if (isset($item['vegetarian']) &amp;&amp; $item['vegetarian'] == 1) {
+
+  // has the user entered a name?
+  if (!empty($item['name'])) {
     $has_stuff = TRUE;
   }
   return !$has_stuff;
 }
 </code></pre>
 
-<p>This hook is easy to get wrong. You are no doubt smarter than me, but if you notice that your values aren't saving, <strong>check your <code>hook_field_is_empty()</code> implementation.</strong></p>
+<p>This hook is easy to get wrong. If <code>poutine_maker_field_is_empty()</code> ever returns true when it should be false, the entered values will just be ignored. You are no doubt smarter than me, but if you ever notice that your values aren't saving, <strong>check your <code>hook_field_is_empty()</code> implementation.</strong></p>
 
 <h2>Step 4: Tell Drupal how to store your values with <code>hook_field_schema()</code></h2>
 
-<p><code>hook_field_schema()</code> defines a table specifically for saving your field values:</p>
+<p><code>hook_field_schema()</code> defines a table specifically for saving your field values. If you aren't already familiar with the Schema API, you can learn more about it <a href="http://drupal.org/developing/api/schema">here</a>.</p>
 
 <p>In <code>poutine_maker.install</code>:</p>
 
 <pre><code>function poutine_maker_field_schema($field) {
+  // include poutine_maker.toppings.inc for poutine_maker_toppings()
   module_load_include('inc', 'poutine_maker', 'poutine_maker.toppings');
+
   $columns = array(
     'name' =&gt; array('type' =&gt; 'varchar', 'length' =&gt; 255, 'not null' =&gt; TRUE),
     'vegetarian' =&gt; array('type' =&gt; 'int', 'length' =&gt; 1, 'not null' =&gt; FALSE),
   );
+
+  // poutine_maker_toppings() returns all the toppings;
+  // make a column for each topping
   foreach (poutine_maker_toppings() as $topping_machine=&gt;$topping) {
     $columns[$topping_machine] = array(
       'type' =&gt; 'int',
@@ -269,12 +265,12 @@ $element['meat'] = array(
 }
 </code></pre>
 
-<p>What does this do? Before I answer this question, let's take at a few keys of <code>$form</code>. In this case, <code>$form</code> is the 'meat' fieldset, to which we added the #process callback:</p>
+<p>What does this do? Before I answer this question, let's take a look at a few keys of <code>$form</code>. In this case, <code>$form</code> is the 'meat' fieldset, to which we added the #process callback:</p>
 
 <pre><code>$form = array(
   ...
-  '#array_parents' =&gt; array('feild_poutine_meat', 'und', 0, 'meat'),
-  '#parents' =&gt; array('feild_poutine_meat', 'und', 0, 'meat'),
+  '#array_parents' =&gt; array('field_poutine_meat', 'und', 0, 'meat'),
+  '#parents' =&gt; array('field_poutine_meat', 'und', 0, 'meat'),
   ...
 );
 </code></pre>
@@ -299,4 +295,3 @@ $element['meat'] = array(
 <p>Next I will cover validation and formatting of custom fields. This is what you need to do to make sure your field stores only valid data, and to display the stored data in a useful fashion.</p>
 
 <p>See <a href="https://github.com/tarmstrong/poutine_maker">poutine_maker</a> on GitHub for a full example. And, as always, let me know if you have questions and I'll try my best to answer them. Even if you don't have questions, let us know what you're using custom fields for!</p>
-</body>
