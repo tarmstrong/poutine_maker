@@ -95,7 +95,7 @@ This is the form element I want customers to use to create custom poutines:
 
 There are three important things to notice about this screenshot:
 
-1. The entire field ("Poutine Maker With Meat") is required, but only the "name" sub-element is required. I will explain how this works in a bit.
+1. The entire field ("Poutine Maker With Meat") is required, but only the "name" sub-element is required. I will explain how this works in a bit. In additon, note that the 'name' is only required in the first poutine item. This is Drupal 7's default behaviour.
 2. The second poutine-item doesn't have a "Meat" fieldset. This is done with [\#states][states]. I will cover \#states in the next part of this tutorial.
 3. There are two poutine items! This is done by setting the *number of values* to "Unlimited" on the field instance settings page. Now this field can store as many poutines in one field as we like.
 
