@@ -200,7 +200,7 @@ This hook is easy to get wrong. If `poutine_maker_field_is_empty()` ever returns
 
 ## Step 4: Tell Drupal how to store your values with `hook_field_schema()`
 
-`hook_field_schema()` defines a table specifically for saving your field values. If you aren't already familiar with the Schema API, you can learn more about it [here][schema].
+`hook_field_schema()` defines table columns specifically for saving your field values. Whereas `hook_schema()` will define a table and its fields, `hook_field_schema()` will only need to define its columns, since the Field API will make a table for *each field instance* of a custom field. If you aren't already familiar with the Schema API, you can learn more about it [here][schema].
 
 [schema]: http://drupal.org/developing/api/schema
 
