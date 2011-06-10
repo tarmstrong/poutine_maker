@@ -125,7 +125,7 @@ You can define many custom fields in a single <code>hook_field_info()</code> dec
 
 <ul>
 <li><code>$items</code> stores the data entered by the user. It is an array of <code>$item</code> arrays, keyed by each item's <code>$delta</code>. If you have a multi-value field instance, there will be more than one item; if your field instance has just one value, then there will be one item with the key <code>0</code>.</li>
-<li><code>$element</code> is the value this function will return. It uses the <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7">Form API</a>'s form definition structure, so it will probably look familiar to you. It is passed to poutine<em>maker</em>field<em>widget</em>form() with some existing values documented <a href="http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7">here</a>, so make sure you don't overwrite it.</li>
+<li><code>$element</code> is the value this function will return. It uses the <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7">Form API</a>'s form definition structure, so it will probably look familiar to you. It is passed to <code>poutine_maker_field_widget_form()</code> with some existing values documented <a href="http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7">here</a>, so make sure you don't overwrite it.</li>
 </ul>
 
 <p>For my poutine field, I want a bunch of sub-elements for name, toppings, etc., so I will make <code>$element</code> a fieldset:</p>
@@ -293,7 +293,7 @@ $element['meat'] = array(
 );
 </code></pre>
 
-<p>#parents and #array<em>parents are identical, except in how they are used. #array</em>parents is for internal use, and shouldn't be touched. #parents, on the other hand, is the array that the Field API uses to determine the structure of $items, which it uses to save the values in the database.</p>
+<p>#parents and #array_parents are identical, except in how they are used. #array_parents is for internal use, and shouldn't be touched. #parents, on the other hand, is the array that the Field API uses to determine the structure of $items, which it uses to save the values in the database.</p>
 
 <p>Our #process callback removes the last value from the #parents array. That's 'meat', which is the name of the fieldset (the same key we used in <code>$element</code>). If we remove that key from #parents, then all the elements under <code>$element['meat']</code> will be saved into <code>$item</code>, not <code>$item['meat']</code> (e.g. <code>$element['meat']['chicken']</code> would be saved into <code>$item['chicken']</code> instead of <code>$item['meat']['chicken']</code>). This will ensure that the values of the meat checkboxes will be saved properly into the database.</p>
 

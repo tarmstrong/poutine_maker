@@ -31,7 +31,7 @@ Those who don't live in Canada may not be familiar with the best thing Montreal 
 
 With the recent startup craze, I figured I'd hop on the bandwagon and start my own company called Poutine.ly. On my company's Drupal 7 site, I wanted to let my hired bloggers blog about new poutine creations my chefs concocted. What I needed was a custom field.
 
-And poutine_maker.module was born.
+And poutine\_maker.module was born.
 
 [poutine_wikipedia]: http://en.wikipedia.org/wiki/Poutine
 
@@ -106,7 +106,7 @@ I did this by implementing `hook_field_widget_form()`. Let's take a look at the 
 There are a lot of parameters that are covered in the [documentation][widget_form_docs], so I'll just cover the important ones:
 
 * `$items` stores the data entered by the user. It is an array of `$item` arrays, keyed by each item's `$delta`. If you have a multi-value field instance, there will be more than one item; if your field instance has just one value, then there will be one item with the key `0`.
-* `$element` is the value this function will return. It uses the [Form API][formapi]'s form definition structure, so it will probably look familiar to you. It is passed to poutine_maker_field_widget_form() with some existing values documented [here][widget_form_docs], so make sure you don't overwrite it.
+* `$element` is the value this function will return. It uses the [Form API][formapi]'s form definition structure, so it will probably look familiar to you. It is passed to `poutine_maker_field_widget_form()` with some existing values documented [here][widget_form_docs], so make sure you don't overwrite it.
 
 [formapi]: http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7
 
@@ -275,7 +275,7 @@ What does this do? Before I answer this question, let's take a look at a few key
       ...
     );
 
-\#parents and #array_parents are identical, except in how they are used. #array_parents is for internal use, and shouldn't be touched. #parents, on the other hand, is the array that the Field API uses to determine the structure of $items, which it uses to save the values in the database.
+\#parents and #array\_parents are identical, except in how they are used. #array\_parents is for internal use, and shouldn't be touched. #parents, on the other hand, is the array that the Field API uses to determine the structure of $items, which it uses to save the values in the database.
 
 Our #process callback removes the last value from the #parents array. That's 'meat', which is the name of the fieldset (the same key we used in `$element`). If we remove that key from #parents, then all the elements under `$element['meat']` will be saved into `$item`, not `$item['meat']` (e.g. `$element['meat']['chicken']` would be saved into `$item['chicken']` instead of `$item['meat']['chicken']`). This will ensure that the values of the meat checkboxes will be saved properly into the database.
 
