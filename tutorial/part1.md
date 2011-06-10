@@ -37,7 +37,7 @@ And poutine_maker.module was born.
 
 ## Step 1: Define your field type with `hook_field_info()`
 
-First you need to tell Drupal that you are defining your own field type. You can also define new widgets and formatters for existing field types, but in this example we want to store a Poutine creation, which is not an existing field type (well, it might be in contrib...)
+First you need to tell Drupal that you are defining your own field type. You can also define new widgets and formatters for existing field types, but in this example we want to store a Poutine creation, which is not an existing field type.
 
 Here is how you define a field type:
 
@@ -57,7 +57,7 @@ Here is how you define a field type:
 Pay close attention to the `default_widget` and `default_formatter` values. We will use these machine-readable widget and formatter names throughout the module.
 
 <aside>
-You can define many custom fields in a single `hook_field_info()` declaration. An elaborate example of this is [date\_field\_info()][date_field_info] in `date.field.inc` of the [Date][date] module.
+You can define many custom fields in a single `hook_field_info()` declaration. An elaborate example of this is [date\_field\_info()][date_field_info] in the [Date][date] module.
 </aside>
 
 [date_field_info]: http://api.lullabot.com/date_field_info/7
@@ -84,7 +84,7 @@ Here's the code:
 
 Remember `poutine_maker_poutine_widget`? That's the full machine-readable widget name. The convention is `<modulename>_<fieldname>_<widgetname>`. In this case, I've named my widget `widget`; I only intend to make one widget for this field, and I don't have a good way to describe it. However, if you can describe your widget, do so: `poutine_maker_poutine_threetext` would be a good name for my widget if it consisted of three text fields.
 
-Also note that I am specifically telling Drupal that my widget can work with the `poutine_maker_poutine` field type. Here is where you could specify other field types your widget works with.
+Also note that I am specifically telling Drupal that my widget can work with the `poutine_maker_poutine` field type. Here is where you could specify other field types your widget works with, like `text` or `datetime`.
 
 ## Step 3: Tell Drupal how to display your widget with `hook_field_widget_form()`
 
@@ -154,6 +154,8 @@ Poutine puritans will be horrified (and others may just feel a trembling in thei
     );
 
     // Create a checkbox item for each meat on the menu
+    // poutine_maker_toppings_meat() returns an associative array of all the meats I want available
+    // It is in a separate file that I have not included in this tutorial
     foreach (poutine_maker_toppings_meat() as $meat_machine=>$meat) {
       $element['meat'][$meat_machine] = array(
         '#title' => t($meat),
@@ -170,39 +172,51 @@ In the [full version][poutine_maker] of the `poutine_maker` example module I wro
 
 ## Step 3: Tell Drupal how to tell when your field is empty with `hook_field_is_empty()`
 
-`hook_field_is_empty()` lets Drupal know whether or not to bother saving or validating submitted values:
-
+`hook_field_is_empty()` lets Drupal know whether or not to bother saving or validating submitted values. In the following example, I first check to see if any of the checkboxes have been checked off, and then check to see if they have entered a name. If any of these conditions are satisfied, I consider the field non-empty (though not necessarily *full*).
 
     function poutine_maker_field_is_empty($item, $field) {
       $has_stuff = FALSE;
+
+      // first see if any of the topping checkboxes have been checked off
       foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
         if (isset($item[$topping_machine]) && $item[$topping_machine] == 1) {
           $has_stuff = TRUE;
         }
       }
-      if (!empty($item['name'])) {
+
+      // has the user checked off the 'vegetarian' checkbox?
+      if (isset($item['vegetarian']) && $item['vegetarian'] == 1) {
         $has_stuff = TRUE;
       }
-      if (isset($item['vegetarian']) && $item['vegetarian'] == 1) {
+
+      // has the user entered a name?
+      if (!empty($item['name'])) {
         $has_stuff = TRUE;
       }
       return !$has_stuff;
     }
 
-This hook is easy to get wrong. You are no doubt smarter than me, but if you notice that your values aren't saving, **check your `hook_field_is_empty()` implementation.**
+This hook is easy to get wrong. If `poutine_maker_field_is_empty()` ever returns true when it should be false, the entered values will just be ignored. You are no doubt smarter than me, but if you ever notice that your values aren't saving, **check your `hook_field_is_empty()` implementation.**
 
 ## Step 4: Tell Drupal how to store your values with `hook_field_schema()`
 
-`hook_field_schema()` defines a table specifically for saving your field values:
+`hook_field_schema()` defines a table specifically for saving your field values. If you aren't already familiar with the Schema API, you can learn more about it [here][schema].
+
+[schema]: http://drupal.org/developing/api/schema
 
 In `poutine_maker.install`:
 
     function poutine_maker_field_schema($field) {
+      // include poutine_maker.toppings.inc for poutine_maker_toppings()
       module_load_include('inc', 'poutine_maker', 'poutine_maker.toppings');
+
       $columns = array(
         'name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
         'vegetarian' => array('type' => 'int', 'length' => 1, 'not null' => FALSE),
       );
+
+      // poutine_maker_toppings() returns all the toppings;
+      // make a column for each topping
       foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
         $columns[$topping_machine] = array(
           'type' => 'int',
@@ -252,12 +266,12 @@ The `array_merge` is just to preserve the current #process callbacks. Here is th
       return $form;
     }
 
-What does this do? Before I answer this question, let's take at a few keys of `$form`. In this case, `$form` is the 'meat' fieldset, to which we added the #process callback:
+What does this do? Before I answer this question, let's take a look at a few keys of `$form`. In this case, `$form` is the 'meat' fieldset, to which we added the #process callback:
 
     $form = array(
       ...
-      '#array_parents' => array('feild_poutine_meat', 'und', 0, 'meat'),
-      '#parents' => array('feild_poutine_meat', 'und', 0, 'meat'),
+      '#array_parents' => array('field_poutine_meat', 'und', 0, 'meat'),
+      '#parents' => array('field_poutine_meat', 'und', 0, 'meat'),
       ...
     );
 
