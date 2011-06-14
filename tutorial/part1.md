@@ -68,7 +68,7 @@ You can define many custom fields in a single `hook_field_info()` declaration. A
 
 Next, we need to tell Drupal about your custom widget. This will tell Drupal to add your field to the list of possible field types on the Manage Fields tab of each fieldable entity (e.g. each content type). This will allow users to make use of your field, like this:
 
-![Adding a field](create%20field.png)
+![Adding a field](http://evolvingweb.ca/sites/default/files/create%20field.png)
 
 Here's the code:
 
@@ -91,7 +91,7 @@ Also note that I am specifically telling Drupal that my widget can work with the
 
 Next, I'll talk about how to create the form widget that gets displayed to users who are actually entering data into the field. This is how I want the form element to appear to customers ordering their poutine:
 
-![Custom poutine form](multipoutine.png)
+![Custom poutine form](http://evolvingweb.ca/sites/default/files/multipoutine.png)
 
 There are three important things to notice about this screenshot:
 
@@ -259,15 +259,15 @@ Each sub-element we defined in `hook_widget_form()` has a column in this table. 
 
 Now that you've created your first custom field, it's time to see it in action. I like to test custom fields by attaching my field to a simple node like a Basic Page (Structure -> Content Types -> Basic Page -> Manage Fields).
 
-![Create It](create%20field.png)
+![Create It](http://evolvingweb.ca/sites/default/files/create%20field.png)
 
 Once you click "Save", it will ask you to configure your field:
 
-![Configure It](configure%20field.png)
+![Configure It](http://evolvingweb.ca/sites/default/files/configure%20field.png)
 
 Now when I add a new Basic Page (Content -> Add content -> Basic Page), my field is attached to the form (this time I have set *number of items* to 1):
 
-![Poutine Maker in Action](create%20basic%20page%20with%20poutine.png)
+![Poutine Maker in Action](http://evolvingweb.ca/sites/default/files/create%20basic%20page%20with%20poutine.png)
 
 ## The fieldsets \#process trick
 

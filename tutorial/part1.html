@@ -31,7 +31,7 @@
 </ol>
 
 <p><aside>
-The <code>field_example</code> module is, as the name implies, a great example of how custom fields are defined.
+The <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>field_example</span> module is, as the name implies, a great example of how custom fields are defined.
 </aside></p>
 
 <p>In this post, I'll start by covering the first item: custom field widgets. But first let's take a  look at the main hooks I'll cover in this series.</p>
@@ -39,13 +39,13 @@ The <code>field_example</code> module is, as the name implies, a great example o
 <h2>Field API Hooks</h2>
 
 <ul>
-<li><code>hook_field_info()</code> tells Drupal about your custom fields.</li>
-<li><code>hook_field_widget_info()</code> tells Drupal about your custom field widgets.</li>
-<li><code>hook_field_widget_form()</code> tells Drupal the structure of your custom field widget, so that a form can be displayed to the user.</li>
-<li><code>hook_field_is_empty()</code> tells Drupal how to tell whether or not the user has entered any data worth saving.</li>
-<li><code>hook_field_validate()</code> tells Drupal about any errors detected in the submitted data.</li>
-<li><code>hook_field_formatter_info()</code> tells Drupal about your custom field formatters.</li>
-<li><code>hook_field_formatter_view()</code> tells Drupal how to display the data in your field to the user.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_info()</span> tells Drupal about your custom fields.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_info()</span> tells Drupal about your custom field widgets.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_form()</span> tells Drupal the structure of your custom field widget, so that a form can be displayed to the user.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_is_empty()</span> tells Drupal how to tell whether or not the user has entered any data worth saving.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_validate()</span> tells Drupal about any errors detected in the submitted data.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_formatter_info()</span> tells Drupal about your custom field formatters.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_formatter_view()</span> tells Drupal how to display the data in your field to the user.</li>
 </ul>
 
 <h2>The Challenge</h2>
@@ -56,13 +56,14 @@ The <code>field_example</code> module is, as the name implies, a great example o
 
 <p>And poutine_maker.module was born.</p>
 
-<h2>Step 1: Define your field type with <code>hook_field_info()</code></h2>
+<h2>Step 1: Define your field type with hook_field_info()</h2>
 
 <p>First, you need to tell Drupal that you are defining your own field type. You can also define new widgets and formatters for existing field types, but in this example we want to add a brand new field type called 'poutine creation'.</p>
 
 <p>Here is how you define a field type:</p>
 
-<pre><code>function poutine_maker_field_info() {
+<pre><code>
+function poutine_maker_field_info() {
   return array(
     'poutine_maker_poutine' =&gt; array(
       'label' =&gt; t('Custom Poutine'),
@@ -72,25 +73,27 @@ The <code>field_example</code> module is, as the name implies, a great example o
     ),
   );
 }
-</code></pre>
+</code>
+</pre>
 
-<p>Note that <code>poutine_maker_poutine</code> is the machine-readable name of the field. The convention is to name it in the form <code>&lt;modulename&gt;_&lt;fieldname&gt;</code>. In this example, poutine_maker is the module name and poutine is the field name.</p>
+<p>Note that <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_poutine</span> is the machine-readable name of the field. The convention is to name it in the form <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>&lt;modulename&gt;_&lt;fieldname&gt;</span>. In this example, poutine_maker is the module name and poutine is the field name.</p>
 
-<p>Pay close attention to the <code>default_widget</code> and <code>default_formatter</code> values. We will use these machine-readable widget and formatter names throughout the module.</p>
+<p>Pay close attention to the <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>default_widget</span> and <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>default_formatter</span> values. We will use these machine-readable widget and formatter names throughout the module.</p>
 
 <p><aside>
-You can define many custom fields in a single <code>hook_field_info()</code> declaration. An elaborate example of this is <a href="http://api.lullabot.com/date_field_info/7">date_field_info()</a> in the <a href="http://drupal.org/project/date">Date</a> module.
+You can define many custom fields in a single <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_info()</span> declaration. An elaborate example of this is <a href="http://api.lullabot.com/date_field_info/7">date_field_info()</a> in the <a href="http://drupal.org/project/date">Date</a> module.
 </aside></p>
 
-<h2>Step 2: Tell Drupal about your field widget with <code>hook_field_widget_info()</code></h2>
+<h2>Step 2: Tell Drupal about your field widget with hook_field_widget_info()</h2>
 
 <p>Next, we need to tell Drupal about your custom widget. This will tell Drupal to add your field to the list of possible field types on the Manage Fields tab of each fieldable entity (e.g. each content type). This will allow users to make use of your field, like this:</p>
 
-<p><img src="create%20field.png" alt="Adding a field" title="" /></p>
+<p><img src="http://evolvingweb.ca/sites/default/files/create%20field.png" alt="Adding a field" title="" /></p>
 
 <p>Here's the code:</p>
 
-<pre><code>function poutine_maker_field_widget_info() {
+<pre><code>
+function poutine_maker_field_widget_info() {
   return array(
     'poutine_maker_poutine_widget' =&gt; array(
       'label' =&gt; t('Default'),
@@ -98,17 +101,18 @@ You can define many custom fields in a single <code>hook_field_info()</code> dec
     ),
   );
 }
-</code></pre>
+</code>
+</pre>
 
-<p>Remember <code>poutine_maker_poutine_widget</code>? That's the full machine-readable widget name. The convention is <code>&lt;modulename&gt;_&lt;fieldname&gt;_&lt;widgetname&gt;</code>. In this case, the widget name is 'widget'. I intend to make only one widget for this field, but if you're using multiple widgets, you'll need to come up with descriptive widget names for each option. If one of your widgets includes autocomplete input items, you could name it <code>poutine_maker_poutine_autocomplete</code>.</p>
+<p>Remember <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_poutine_widget</span>? That's the full machine-readable widget name. The convention is <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>&lt;modulename&gt;_&lt;fieldname&gt;_&lt;widgetname&gt;</span>. In this case, the widget name is 'widget'. I intend to make only one widget for this field, but if you're using multiple widgets, you'll need to come up with descriptive widget names for each option. If one of your widgets includes autocomplete input items, you could name it <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_poutine_autocomplete</span>.</p>
 
-<p>Also note that I am specifically telling Drupal that my widget can work with the <code>poutine_maker_poutine</code> field type. If you want to use the same widget for multiple field types, you could specify those field types here, by adding them to the <code>field_types</code> array.</p>
+<p>Also note that I am specifically telling Drupal that my widget can work with the <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_poutine</span> field type. If you want to use the same widget for multiple field types, you could specify those field types here, by adding them to the <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>field_types</span> array.</p>
 
-<h2>Step 3: Tell Drupal how to display your widget with <code>hook_field_widget_form()</code></h2>
+<h2>Step 3: Tell Drupal how to display your widget with hook_field_widget_form()</h2>
 
 <p>Next, I'll talk about how to create the form widget that gets displayed to users who are actually entering data into the field. This is how I want the form element to appear to customers ordering their poutine:</p>
 
-<p><img src="multipoutine.png" alt="Custom poutine form" title="" /></p>
+<p><img src="http://evolvingweb.ca/sites/default/files/multipoutine.png" alt="Custom poutine form" title="" /></p>
 
 <p>There are three important things to notice about this screenshot:</p>
 
@@ -118,9 +122,10 @@ You can define many custom fields in a single <code>hook_field_info()</code> dec
 <li>The second poutine item doesn't have a "Meat" fieldset, because the 'Vegetarian' checkbox is checked. This is done with <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7#states">#states</a>. I will cover #states in the next part of this tutorial.</li>
 </ol>
 
-<p>I implemented the widget shown in the above screenshot by implementing <code>hook_field_widget_form()</code>. Let's take a look at the function signature of my implementation, <code>poutine_maker_field_widget_form()</code>:</p>
+<p>I implemented the widget shown in the above screenshot by implementing <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_form()</span>. Let's take a look at the function signature of my implementation, <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_widget_form()</span>:</p>
 
-<pre><code>function poutine_maker_field_widget_form(&amp;$form,
+<pre><code>
+function poutine_maker_field_widget_form(&amp;$form,
                                          &amp;$form_state,
                                          $field,
                                          $instance,
@@ -128,29 +133,33 @@ You can define many custom fields in a single <code>hook_field_info()</code> dec
                                          $items,
                                          $delta,
                                          $element)
-</code></pre>
+</code>
+</pre>
 
 <p>There are a lot of parameters that are covered in the <a href="http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7">documentation</a>, so I'll just cover the important ones:</p>
 
 <ul>
-<li><code>$items</code> stores the data entered by the user. It is an array of <code>$item</code> arrays, keyed by each item's <code>$delta</code>. If you have a multi-value field instance, there will be more than one item; if your field instance has just one value, then there will be one item with the key <code>0</code>.</li>
-<li><code>$element</code> is the value this function will return. It uses the <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7">Form API</a>'s form definition structure, so it will probably look familiar to you. It is passed to <code>poutine_maker_field_widget_form()</code> with some existing values documented <a href="http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7">here</a>, so make sure you don't overwrite it.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$items</span> stores the data entered by the user. It is an array of <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item</span> arrays, keyed by each item's <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$delta</span>. If you have a multi-value field instance, there will be more than one item; if your field instance has just one value, then there will be one item with the key <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>0</span>.</li>
+<li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$element</span> is the value this function will return. It uses the <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7">Form API</a>'s form definition structure, so it will probably look familiar to you. It is passed to <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_widget_form()</span> with some existing values documented <a href="http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7">here</a>, so make sure you don't overwrite it.</li>
 </ul>
 
 <h3>Creating a Fieldset</h3>
 
-<p>For my poutine field, I want a bunch of sub-elements for name, toppings, etc., so I will make <code>$element</code> a fieldset:</p>
+<p>For my poutine field, I want a bunch of sub-elements for name, toppings, etc., so I will make <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$element</span> a fieldset:</p>
 
-<pre><code>$element += array(
+<pre><code>
+$element += array(
   '#type' =&gt; 'fieldset',
 );
-</code></pre>
+</code>
+</pre>
 
 <h3>Adding a Name Field</h3>
 
 <p>Next, I want to add a name field so customers can name their poutine creations:</p>
 
-<pre><code>$item =&amp; $items[$delta];
+<pre><code>
+$item =&amp; $items[$delta];
 
 $element['name'] = array(
   '#title' =&gt; t('Name'),
@@ -160,26 +169,30 @@ $element['name'] = array(
   // with the current saved value
   '#default_value' =&gt; isset($item['name']) ? $item['name'] : '',
 );
-</code></pre>
+</code>
+</pre>
 
-<p>All of these keys should look familiar if you've used the Form API before (see the <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7">reference</a> if they don't). Just note that we're using <code>$item</code> to set the default value. Since <code>$item</code> is just the data stored by the form, this pre-fills the element with whatever the current value is -- if one has been set. Drupal will automatically map the value of $element['name'] to $item['name'], but this isn't always the case, as we'll see when we create nested fieldsets.</p>
+<p>All of these keys should look familiar if you've used the Form API before (see the <a href="http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7">reference</a> if they don't). Just note that we're using <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item</span> to set the default value. Since <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item</span> is just the data stored by the form, this pre-fills the element with whatever the current value is -- if one has been set. Drupal will automatically map the value of $element['name'] to $item['name'], but this isn't always the case, as we'll see when we create nested fieldsets.</p>
 
 <h3>Vegetarian Option</h3>
 
 <p>Here is a checkbox for informing the chef that you are vegetarian:</p>
 
-<pre><code>$element['vegetarian'] = array(
+<pre><code>
+$element['vegetarian'] = array(
   '#title' =&gt; t('Vegetarian'),
   '#type' =&gt; 'checkbox',
   '#default_value' =&gt; isset($item['vegetarian']) ? $item['vegetarian'] : '',
 );
-</code></pre>
+</code>
+</pre>
 
 <h3>Adding the Meat!</h3>
 
 <p>Poutine puritans will be horrified (and others may just feel a trembling in their arteries), but here is a fieldset with a few meats to choose from:</p>
 
-<pre><code>$process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
+<pre><code>
+$process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
 
 $element['meat'] = array(
   '#title' =&gt; t('Meat'),
@@ -197,23 +210,25 @@ foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
     '#default_value' =&gt; isset($item[$meat_machine]) ? $item[$meat_machine] : '',
   );
 }
-</code></pre>
+</code>
+</pre>
 
-<p>You'll notice that I added a #process key to the fieldset. This is because the 'meat' fieldset is nested within another fieldset (the <code>$element</code> fieldset). Drupal doesn't know automatically how to map <code>$form</code> values to <code>$item</code> values when they are within fieldsets, so I've added a #process callback to fix this. I will explain this in greater detail later.</p>
+<p>You'll notice that I added a #process key to the fieldset. This is because the 'meat' fieldset is nested within another fieldset (the <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$element</span> fieldset). Drupal doesn't know automatically how to map <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$form</span> values to <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item</span> values when they are within fieldsets, so I've added a #process callback to fix this. I will explain this in greater detail later.</p>
 
 <h3>Other Toppings</h3>
 
-<p>In the <a href="https://github.com/tarmstrong/poutine_maker">full version</a> of the <code>poutine_maker</code> example module I wrote for this post, I also include a <code>$element['toppings']</code> fieldset the same way, which is a separate fieldset for non-meat toppings.</p>
+<p>In the <a href="https://github.com/tarmstrong/poutine_maker">full version</a> of the <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker</span> example module I wrote for this post, I also include a <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$element['toppings']</span> fieldset the same way, which is a separate fieldset for non-meat toppings.</p>
 
 <p>As an exercise, add a toppings element to your field, which would allow customers to choose which vegetarian toppings they want on their poutine creation.</p>
 
-<h2>Step 3: Tell Drupal how to tell when your field is empty with <code>hook_field_is_empty()</code></h2>
+<h2>Step 3: Tell Drupal how to tell when your field is empty with hook_field_is_empty()</h2>
 
-<p>After a user enters some values into your custom field and hits 'submit', we want Drupal to validate and then save the entered data. However, before Drupal will validate the fields, it checks to see if the fields are empty. If they are, it won't try to validate or save anything. In order to let Drupal know whether or not values have been submitted, we'll need to implement <code>hook_field_is_empty()</code>. </p>
+<p>After a user enters some values into your custom field and hits 'submit', we want Drupal to validate and then save the entered data. However, before Drupal will validate the fields, it checks to see if the fields are empty. If they are, it won't try to validate or save anything. In order to let Drupal know whether or not values have been submitted, we'll need to implement <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_is_empty()</span>. </p>
 
 <p>In the following example, I first check to see if any of the checkboxes have been checked off, and then check to see if the user has entered a name. If any of these conditions are satisfied, I consider the field non-empty. This doesn't mean that the field will validate, but that it should be run through validation.</p>
 
-<pre><code>function poutine_maker_field_is_empty($item, $field) {
+<pre><code>
+function poutine_maker_field_is_empty($item, $field) {
   $has_stuff = FALSE;
 
   // first see if any of the topping checkboxes have been checked off
@@ -234,17 +249,19 @@ foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
   }
   return !$has_stuff;
 }
-</code></pre>
+</code>
+</pre>
 
-<p>This hook is easy to get wrong. If <code>poutine_maker_field_is_empty()</code> ever returns true when it should be false, the entered values will just be ignored. You are no doubt smarter than me, but if you ever notice that your values aren't saving, <strong>check your <code>hook_field_is_empty()</code> implementation.</strong></p>
+<p>This hook is easy to get wrong. If <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_is_empty()</span> ever returns true when it should be false, the entered values will just be ignored. You are no doubt smarter than me, but if you ever notice that your values aren't saving, <strong>check your <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_is_empty()</span> implementation.</strong></p>
 
-<h2>Step 4: Tell Drupal how to store your values with <code>hook_field_schema()</code></h2>
+<h2>Step 4: Tell Drupal how to store your values with hook_field_schema()</h2>
 
-<p>Collecting data from users is great, but we also need to define how Drupal will store this data. <code>hook_field_schema()</code> defines table columns specificaly for saving your field values. Whereas <code>hook_schema()</code> will define a table and its fields, <code>hook_field_schema()</code> will only need to define its columns, since the Field API will make a table for each field instance of a custom field. You can learn more about Drupal's Schema API <a href="http://drupal.org/developing/api/schema">here</a>.</p>
+<p>Collecting data from users is great, but we also need to define how Drupal will store this data. <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_schema()</span> defines table columns specificaly for saving your field values. Whereas <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_schema()</span> will define a table and its fields, <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_schema()</span> will only need to define its columns, since the Field API will make a table for each field instance of a custom field. You can learn more about Drupal's Schema API <a href="http://drupal.org/developing/api/schema">here</a>.</p>
 
-<p>In <code>poutine_maker.install</code>:</p>
+<p>In <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker.install</span>:</p>
 
-<pre><code>function poutine_maker_field_schema($field) {
+<pre><code>
+function poutine_maker_field_schema($field) {
   // include poutine_maker.toppings.inc for poutine_maker_toppings()
   module_load_include('inc', 'poutine_maker', 'poutine_maker.toppings');
 
@@ -267,67 +284,74 @@ foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
     'indexes' =&gt; array(),
   );
 }
-</code></pre>
+</code>
+</pre>
 
-<p>Each sub-element we defined in <code>hook_widget_form()</code> has a column in this table. Notice that there is nothing that resembles a fieldset. This should not surprise you if you have used databases before, but it is useful to know why we need to use a special #process callback to 'flatten' the form values.</p>
+<p>Each sub-element we defined in <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_widget_form()</span> has a column in this table. Notice that there is nothing that resembles a fieldset. This should not surprise you if you have used databases before, but it is useful to know why we need to use a special #process callback to 'flatten' the form values.</p>
 
 <h2>Step 5: Generate an instance of your new field!</h2>
 
 <p>Now that you've created your first custom field, it's time to see it in action. I like to test custom fields by attaching my field to a simple node like a Basic Page (Structure -> Content Types -> Basic Page -> Manage Fields).</p>
 
-<p><img src="create%20field.png" alt="Create It" title="" /></p>
+<p><img src="http://evolvingweb.ca/sites/default/files/create%20field.png" alt="Create It" title="" /></p>
 
 <p>Once you click "Save", it will ask you to configure your field:</p>
 
-<p><img src="configure%20field.png" alt="Configure It" title="" /></p>
+<p><img src="http://evolvingweb.ca/sites/default/files/configure%20field.png" alt="Configure It" title="" /></p>
 
 <p>Now when I add a new Basic Page (Content -> Add content -> Basic Page), my field is attached to the form (this time I have set <em>number of items</em> to 1):</p>
 
-<p><img src="create%20basic%20page%20with%20poutine.png" alt="Poutine Maker in Action" title="" /></p>
+<p><img src="http://evolvingweb.ca/sites/default/files/create%20basic%20page%20with%20poutine.png" alt="Poutine Maker in Action" title="" /></p>
 
 <h2>The fieldsets #process trick</h2>
 
 <p>I promised to explain the #process trick I used. Here's where I tell the Form API about my process callback:</p>
 
-<pre><code>$process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
+<pre><code>
+$process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
 
 $element['meat'] = array(
   '#title' =&gt; t('Meat'),
   '#type' =&gt; 'fieldset',
   '#process' =&gt; $process,
 );
-</code></pre>
+</code>
+</pre>
 
-<p>The <code>array_merge</code> is just to preserve the current #process callbacks. Here is the callback itself:</p>
+<p>The <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>array_merge</span> is just to preserve the current #process callbacks. Here is the callback itself:</p>
 
-<pre><code>function poutine_maker_ignore_parent(&amp;$form, &amp;$form_state, $complete) {
+<pre><code>
+function poutine_maker_ignore_parent(&amp;$form, &amp;$form_state, $complete) {
   array_pop($form['#parents']);
   return $form;
 }
-</code></pre>
+</code>
+</pre>
 
-<p>What does this do? Before I answer this question, let's take a look at a few keys of <code>$form</code>. In this case, <code>$form</code> is the 'meat' fieldset, to which we added the #process callback:</p>
+<p>What does this do? Before I answer this question, let's take a look at a few keys of <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$form</span>. In this case, <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$form</span> is the 'meat' fieldset, to which we added the #process callback:</p>
 
-<pre><code>$form = array(
+<pre><code>
+$form = array(
   ...
   '#array_parents' =&gt; array('field_poutine_meat', 'und', 0, 'meat'),
   '#parents' =&gt; array('field_poutine_meat', 'und', 0, 'meat'),
   ...
 );
-</code></pre>
+</code>
+</pre>
 
 <p>#parents and #array_parents are identical, except in how they are used. #array_parents is for internal use, and shouldn't be touched. #parents, on the other hand, is the array that the Field API uses to determine the structure of $items, which it uses to save the values in the database.</p>
 
-<p>Our #process callback removes the last value from the #parents array. That's 'meat', which is the name of the fieldset (the same key we used in <code>$element</code>). If we remove that key from #parents, then all the elements under <code>$element['meat']</code> will be saved into <code>$item</code>, not <code>$item['meat']</code> (e.g. <code>$element['meat']['chicken']</code> would be saved into <code>$item['chicken']</code> instead of <code>$item['meat']['chicken']</code>). This will ensure that the values of the meat checkboxes will be saved properly into the database.</p>
+<p>Our #process callback removes the last value from the #parents array. That's 'meat', which is the name of the fieldset (the same key we used in <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$element</span>). If we remove that key from #parents, then all the elements under <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$element['meat']</span> will be saved into <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item</span>, not <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item['meat']</span> (e.g. <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$element['meat']['chicken']</span> would be saved into <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item['chicken']</span> instead of <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$item['meat']['chicken']</span>). This will ensure that the values of the meat checkboxes will be saved properly into the database.</p>
 
 <h2>Summary</h2>
 
 <p>To create your own custom field:</p>
 
 <ol>
-<li>Tell Drupal about your field with <code>hook_field_info()</code>.</li>
-<li>Tell Drupal about your widget with <code>hook_field_widget_info()</code>.</li>
-<li>Tell Drupal about the structure of your widget form with <code>hook_field_widget_form()</code>.</li>
+<li>Tell Drupal about your field with <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_info()</span>.</li>
+<li>Tell Drupal about your widget with <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_info()</span>.</li>
+<li>Tell Drupal about the structure of your widget form with <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_form()</span>.</li>
 <li>Define a schema that Drupal will use to save the submitted values.</li>
 </ol>
 
