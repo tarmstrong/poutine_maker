@@ -1,14 +1,14 @@
 # Poutine Maker: An Introduction to the Field API in Drupal 7 (Part 1)
 
-The power of Drupal stems from its willingness to be customized. In a recent project, we needed a way to provide complex fields with custom widgets and formatters unavailable in core or contributed modules. Drupal 7's Field API, however, provides the hooks needed to make just about any field we wanted.
+The power of Drupal stems from our ability to customize it. One common requirement is the need to define complex fields with custom widgets and formatters that are unavailable in core or contributed modules. This allows us to collect more sophisticated data from users, and define exactly how that data is presented. Drupal 7's Field API provides the hooks needed to make just about any field we want.
 
 ## What Problems Are We Solving?
 
-The top two reasons for wanting to make a custom field are:
+The top reasons for wanting to make a custom field are:
 
-1. You want to customize the way a user inputs their data. This is done with a **custom field widget**.
-2. You want to customize the way a field is displayed. This is done with a **custom field formatter**.
-3. You want a complex multi-value fieldset. Currently there is no way to do this in Drupal 7. By defining a custom field and setting the "Number of values" setting to "Unlimited", we can use **one field to store many complex values**.
+1. To customize the way a user inputs their data. This is done with a custom field widget.
+2. To customize the way a field is displayed. This is done with a custom field formatter.
+3. To create a complex multi-value fieldset. Currently there is no way to do this in Drupal 7. By defining a custom field and setting the "Number of values" setting to "Unlimited", we can use one field to store many complex values.
 
 <aside>
 The `field_example` module is, as the name implies, a great example of how custom fields are defined.
@@ -30,7 +30,7 @@ In this post, I'll start by covering the first item: custom field widgets. But f
 
 Those who don't live in Canada may not be familiar with the best thing Montreal has to offer: [poutine][poutine_wikipedia]. Poutine is the delicious but harmful combination of French fries, cheese curds, and copious amounts of gravy. Those who live outside Quebec may not even be aware of the stuff Montrealers put in their poutine: I've seen anything from lobster to smoked meat to avocado in poutine.
 
-With the recent startup craze, I figured I'd hop on the bandwagon and start my own company called Poutine.ly. On my company's Drupal 7 site, I wanted to let my hired bloggers blog about new poutine creations my chefs concocted. What I needed was a custom field.
+With the recent startup craze, I figured I'd hop on the bandwagon and start my own Poutine web startup. On my company's Drupal 7 site, I wanted to let my hired bloggers blog about new poutine creations my chefs concocted. What I needed was a custom field.
 
 And poutine\_maker.module was born.
 
@@ -38,7 +38,7 @@ And poutine\_maker.module was born.
 
 ## Step 1: Define your field type with `hook_field_info()`
 
-First you need to tell Drupal that you are defining your own field type. You can also define new widgets and formatters for existing field types, but in this example we want to store a Poutine creation, which is not an existing field type.
+First, you need to tell Drupal that you are defining your own field type. You can also define new widgets and formatters for existing field types, but in this example we want to add a brand new field type called 'poutine creation'.
 
 Here is how you define a field type:
 
@@ -53,7 +53,7 @@ Here is how you define a field type:
       );
     }
 
-`poutine_maker_poutine` is the machine-readable name of the field. The convention is to name it in the form `<modulename>_<fieldname>`. In this example, `poutine_maker` is the module name and `poutine` is the field name.
+Note that `poutine_maker_poutine` is the machine-readable name of the field. The convention is to name it in the form `<modulename>_<fieldname>`. In this example, poutine_maker is the module name and poutine is the field name.
 
 Pay close attention to the `default_widget` and `default_formatter` values. We will use these machine-readable widget and formatter names throughout the module.
 
@@ -66,7 +66,7 @@ You can define many custom fields in a single `hook_field_info()` declaration. A
 
 ## Step 2: Tell Drupal about your field widget with `hook_field_widget_info()`
 
-Next we need to tell Drupal about your custom widget. This will allow Drupal to display your field on the Manage Fields tab of a fieldable entity (e.g. a Basic Page) like this:
+Next, we need to tell Drupal about your custom widget. This will tell Drupal to add your field to the list of possible field types on the Manage Fields tab of each fieldable entity (e.g. each content type). This will allow users to make use of your field, like this:
 
 ![Adding a field](create%20field.png)
 
@@ -83,21 +83,21 @@ Here's the code:
     }
 
 
-Remember `poutine_maker_poutine_widget`? That's the full machine-readable widget name. The convention is `<modulename>_<fieldname>_<widgetname>`. In this case, I've named my widget `widget`; I only intend to make one widget for this field, and I don't have a good way to describe it. However, if you can describe your widget, do so: `poutine_maker_poutine_threetext` would be a good name for my widget if it consisted of three text fields.
+Remember `poutine_maker_poutine_widget`? That's the full machine-readable widget name. The convention is `<modulename>_<fieldname>_<widgetname>`. In this case, the widget name is 'widget'. I intend to make only one widget for this field, but if you're using multiple widgets, you'll need to come up with descriptive widget names for each option. If one of your widgets includes autocomplete input items, you could name it `poutine_maker_poutine_autocomplete`.
 
-Also note that I am specifically telling Drupal that my widget can work with the `poutine_maker_poutine` field type. Here is where you could specify other field types your widget works with, like `text` or `datetime`.
+Also note that I am specifically telling Drupal that my widget can work with the `poutine_maker_poutine` field type. If you want to use the same widget for multiple field types, you could specify those field types here, by adding them to the `field_types` array.
 
 ## Step 3: Tell Drupal how to display your widget with `hook_field_widget_form()`
 
-This is the form element I want customers to use to create custom poutines:
+Next, I'll talk about how to create the form widget that gets displayed to users who are actually entering data into the field. This is how I want the form element to appear to customers ordering their poutine:
 
 ![Custom poutine form](multipoutine.png)
 
 There are three important things to notice about this screenshot:
 
-1. The entire field ("Poutine Maker With Meat") is required, but only the "name" sub-element is required. I will explain how this works in a bit. In additon, note that the 'name' is only required in the first poutine item. This is Drupal 7's default behaviour.
-2. The second poutine-item doesn't have a "Meat" fieldset. This is done with [\#states][states]. I will cover \#states in the next part of this tutorial.
-3. There are two poutine items! This is done by setting the *number of values* to "Unlimited" on the field instance settings page. Now this field can store as many poutines in one field as we like.
+1. There are two poutine items! This is done by setting the number of values to "Unlimited" on the field instance settings page. Now this field can store as many poutines in one field as we like.
+2. The entire field ("Poutine Maker With Meat") is marked as required, but only the "name" sub-element is actually required. I will explain how this works in a bit. In addition, note that the name is only required in the first poutine item. This is Drupal 7's default behaviour for multivalued fields with an unlimited number of values.
+3. The second poutine item doesn't have a "Meat" fieldset, because the 'Vegetarian' checkbox is checked. This is done with [\#states][states]. I will cover \#states in the next part of this tutorial.
 
 [states]: http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7#states
 
@@ -121,12 +121,16 @@ There are a lot of parameters that are covered in the [documentation][widget_for
 
 [widget_form_docs]: http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7
 
+### Creating a Fieldset
+
 For my poutine field, I want a bunch of sub-elements for name, toppings, etc., so I will make `$element` a fieldset:
 
 
     $element += array(
       '#type' => 'fieldset',
     );
+
+### Adding a Name Field
 
 Next, I want to add a name field so customers can name their poutine creations:
 
@@ -143,6 +147,8 @@ Next, I want to add a name field so customers can name their poutine creations:
 
 All of these keys should look familiar if you've used the Form API before (see the [reference][formapi] if they don't). Just note that we're using `$item` to set the default value. Since `$item` is just the data stored by the form, this pre-fills the element with whatever the current value is -- if one has been set. Drupal will automatically map the value of $element['name'] to $item['name'], but this isn't always the case, as we'll see when we create nested fieldsets.
 
+### Vegetarian Option
+
 Here is a checkbox for informing the chef that you are vegetarian:
 
 
@@ -151,6 +157,8 @@ Here is a checkbox for informing the chef that you are vegetarian:
       '#type' => 'checkbox',
       '#default_value' => isset($item['vegetarian']) ? $item['vegetarian'] : '',
     );
+
+### Adding the Meat!
 
 Poutine puritans will be horrified (and others may just feel a trembling in their arteries), but here is a fieldset with a few meats to choose from:
 
@@ -162,9 +170,9 @@ Poutine puritans will be horrified (and others may just feel a trembling in thei
       '#process' => $process,
     );
 
-    // Create a checkbox item for each meat on the menu
+    // Create a checkbox item for each meat on the menu.
     // poutine_maker_toppings_meat() returns an associative array of all the meats I want available
-    // It is in a separate file that I have not included in this tutorial
+    // (see the example module)
     foreach (poutine_maker_toppings_meat() as $meat_machine=>$meat) {
       $element['meat'][$meat_machine] = array(
         '#title' => t($meat),
@@ -175,13 +183,19 @@ Poutine puritans will be horrified (and others may just feel a trembling in thei
 
 You'll notice that I added a #process key to the fieldset. This is because the 'meat' fieldset is nested within another fieldset (the `$element` fieldset). Drupal doesn't know automatically how to map `$form` values to `$item` values when they are within fieldsets, so I've added a #process callback to fix this. I will explain this in greater detail later.
 
-In the [full version][poutine_maker] of the `poutine_maker` example module I wrote for this post, I also include a `$element['toppings']` the same way, which is a separate fieldset for non-meat toppings.
+### Other Toppings
+
+In the [full version][poutine_maker] of the `poutine_maker` example module I wrote for this post, I also include a `$element['toppings']` fieldset the same way, which is a separate fieldset for non-meat toppings.
+
+As an exercise, add a toppings element to your field, which would allow customers to choose which vegetarian toppings they want on their poutine creation.
 
 [poutine_maker]: https://github.com/tarmstrong/poutine_maker
 
 ## Step 3: Tell Drupal how to tell when your field is empty with `hook_field_is_empty()`
 
-`hook_field_is_empty()` lets Drupal know whether or not to bother saving or validating submitted values. In the following example, I first check to see if any of the checkboxes have been checked off, and then check to see if they have entered a name. If any of these conditions are satisfied, I consider the field non-empty (though not necessarily *full*).
+After a user enters some values into your custom field and hits 'submit', we want Drupal to validate and then save the entered data. However, before Drupal will validate the fields, it checks to see if the fields are empty. If they are, it won't try to validate or save anything. In order to let Drupal know whether or not values have been submitted, we'll need to implement `hook_field_is_empty()`. 
+
+In the following example, I first check to see if any of the checkboxes have been checked off, and then check to see if the user has entered a name. If any of these conditions are satisfied, I consider the field non-empty. This doesn't mean that the field will validate, but that it should be run through validation.
 
     function poutine_maker_field_is_empty($item, $field) {
       $has_stuff = FALSE;
@@ -209,7 +223,7 @@ This hook is easy to get wrong. If `poutine_maker_field_is_empty()` ever returns
 
 ## Step 4: Tell Drupal how to store your values with `hook_field_schema()`
 
-`hook_field_schema()` defines table columns specifically for saving your field values. Whereas `hook_schema()` will define a table and its fields, `hook_field_schema()` will only need to define its columns, since the Field API will make a table for *each field instance* of a custom field. If you aren't already familiar with the Schema API, you can learn more about it [here][schema].
+Collecting data from users is great, but we also need to define how Drupal will store this data. `hook_field_schema()` defines table columns specificaly for saving your field values. Whereas `hook_schema()` will define a table and its fields, `hook_field_schema()` will only need to define its columns, since the Field API will make a table for each field instance of a custom field. You can learn more about Drupal's Schema API [here][schema].
 
 [schema]: http://drupal.org/developing/api/schema
 
@@ -243,7 +257,7 @@ Each sub-element we defined in `hook_widget_form()` has a column in this table. 
 
 ## Step 5: Generate an instance of your new field!
 
-I like to test custom fields by attaching my field to a simple node like a Basic Page (Structure -> Content Types -> Basic Page -> Manage Fields).
+Now that you've created your first custom field, it's time to see it in action. I like to test custom fields by attaching my field to a simple node like a Basic Page (Structure -> Content Types -> Basic Page -> Manage Fields).
 
 ![Create It](create%20field.png)
 
@@ -255,7 +269,7 @@ Now when I add a new Basic Page (Content -> Add content -> Basic Page), my field
 
 ![Poutine Maker in Action](create%20basic%20page%20with%20poutine.png)
 
-## Errata
+## The fieldsets \#process trick
 
 I promised to explain the #process trick I used. Here's where I tell the Form API about my process callback:
 
