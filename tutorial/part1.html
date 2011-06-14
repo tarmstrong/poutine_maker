@@ -65,11 +65,11 @@ The <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>field_
 <pre><code>
 function poutine_maker_field_info() {
   return array(
-    'poutine_maker_poutine' =&gt; array(
-      'label' =&gt; t('Custom Poutine'),
-      'description' =&gt; t('Custom Poutine Field'),
-      'default_widget' =&gt; 'poutine_maker_poutine_widget',
-      'default_formatter' =&gt; 'poutine_maker_poutine_formatter',
+    'poutine_maker_poutine' => array(
+      'label' => t('Custom Poutine'),
+      'description' => t('Custom Poutine Field'),
+      'default_widget' => 'poutine_maker_poutine_widget',
+      'default_formatter' => 'poutine_maker_poutine_formatter',
     ),
   );
 }
@@ -95,9 +95,9 @@ You can define many custom fields in a single <span style='font-family:"Courier 
 <pre><code>
 function poutine_maker_field_widget_info() {
   return array(
-    'poutine_maker_poutine_widget' =&gt; array(
-      'label' =&gt; t('Default'),
-      'field types' =&gt; array('poutine_maker_poutine'),
+    'poutine_maker_poutine_widget' => array(
+      'label' => t('Default'),
+      'field types' => array('poutine_maker_poutine'),
     ),
   );
 }
@@ -125,8 +125,8 @@ function poutine_maker_field_widget_info() {
 <p>I implemented the widget shown in the above screenshot by implementing <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_form()</span>. Let's take a look at the function signature of my implementation, <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_widget_form()</span>:</p>
 
 <pre><code>
-function poutine_maker_field_widget_form(&amp;$form,
-                                         &amp;$form_state,
+function poutine_maker_field_widget_form(&$form,
+                                         &$form_state,
                                          $field,
                                          $instance,
                                          $langcode,
@@ -149,7 +149,7 @@ function poutine_maker_field_widget_form(&amp;$form,
 
 <pre><code>
 $element += array(
-  '#type' =&gt; 'fieldset',
+  '#type' => 'fieldset',
 );
 </code>
 </pre>
@@ -159,15 +159,15 @@ $element += array(
 <p>Next, I want to add a name field so customers can name their poutine creations:</p>
 
 <pre><code>
-$item =&amp; $items[$delta];
+$item =& $items[$delta];
 
 $element['name'] = array(
-  '#title' =&gt; t('Name'),
-  '#type' =&gt; 'textfield',
-  '#required' =&gt; $required,
+  '#title' => t('Name'),
+  '#type' => 'textfield',
+  '#required' => $required,
   // use #default_value to prepopulate the element
   // with the current saved value
-  '#default_value' =&gt; isset($item['name']) ? $item['name'] : '',
+  '#default_value' => isset($item['name']) ? $item['name'] : '',
 );
 </code>
 </pre>
@@ -180,9 +180,9 @@ $element['name'] = array(
 
 <pre><code>
 $element['vegetarian'] = array(
-  '#title' =&gt; t('Vegetarian'),
-  '#type' =&gt; 'checkbox',
-  '#default_value' =&gt; isset($item['vegetarian']) ? $item['vegetarian'] : '',
+  '#title' => t('Vegetarian'),
+  '#type' => 'checkbox',
+  '#default_value' => isset($item['vegetarian']) ? $item['vegetarian'] : '',
 );
 </code>
 </pre>
@@ -195,19 +195,19 @@ $element['vegetarian'] = array(
 $process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
 
 $element['meat'] = array(
-  '#title' =&gt; t('Meat'),
-  '#type' =&gt; 'fieldset',
-  '#process' =&gt; $process,
+  '#title' => t('Meat'),
+  '#type' => 'fieldset',
+  '#process' => $process,
 );
 
 // Create a checkbox item for each meat on the menu.
 // poutine_maker_toppings_meat() returns an associative array of all the meats I want available
 // (see the example module)
-foreach (poutine_maker_toppings_meat() as $meat_machine=&gt;$meat) {
+foreach (poutine_maker_toppings_meat() as $meat_machine=>$meat) {
   $element['meat'][$meat_machine] = array(
-    '#title' =&gt; t($meat),
-    '#type' =&gt; 'checkbox',
-    '#default_value' =&gt; isset($item[$meat_machine]) ? $item[$meat_machine] : '',
+    '#title' => t($meat),
+    '#type' => 'checkbox',
+    '#default_value' => isset($item[$meat_machine]) ? $item[$meat_machine] : '',
   );
 }
 </code>
@@ -232,14 +232,14 @@ function poutine_maker_field_is_empty($item, $field) {
   $has_stuff = FALSE;
 
   // first see if any of the topping checkboxes have been checked off
-  foreach (poutine_maker_toppings() as $topping_machine=&gt;$topping) {
-    if (isset($item[$topping_machine]) &amp;&amp; $item[$topping_machine] == 1) {
+  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
+    if (isset($item[$topping_machine]) && $item[$topping_machine] == 1) {
       $has_stuff = TRUE;
     }
   }
 
   // has the user checked off the 'vegetarian' checkbox?
-  if (isset($item['vegetarian']) &amp;&amp; $item['vegetarian'] == 1) {
+  if (isset($item['vegetarian']) && $item['vegetarian'] == 1) {
     $has_stuff = TRUE;
   }
 
@@ -266,22 +266,22 @@ function poutine_maker_field_schema($field) {
   module_load_include('inc', 'poutine_maker', 'poutine_maker.toppings');
 
   $columns = array(
-    'name' =&gt; array('type' =&gt; 'varchar', 'length' =&gt; 255, 'not null' =&gt; TRUE),
-    'vegetarian' =&gt; array('type' =&gt; 'int', 'length' =&gt; 1, 'not null' =&gt; FALSE),
+    'name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+    'vegetarian' => array('type' => 'int', 'length' => 1, 'not null' => FALSE),
   );
 
   // poutine_maker_toppings() returns all the toppings;
   // make a column for each topping
-  foreach (poutine_maker_toppings() as $topping_machine=&gt;$topping) {
+  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
     $columns[$topping_machine] = array(
-      'type' =&gt; 'int',
-      'length' =&gt; 1,
-      'not null' =&gt; FALSE,
+      'type' => 'int',
+      'length' => 1,
+      'not null' => FALSE,
     );
   }
   return array(
-    'columns' =&gt; $columns,
-    'indexes' =&gt; array(),
+    'columns' => $columns,
+    'indexes' => array(),
   );
 }
 </code>
@@ -311,9 +311,9 @@ function poutine_maker_field_schema($field) {
 $process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
 
 $element['meat'] = array(
-  '#title' =&gt; t('Meat'),
-  '#type' =&gt; 'fieldset',
-  '#process' =&gt; $process,
+  '#title' => t('Meat'),
+  '#type' => 'fieldset',
+  '#process' => $process,
 );
 </code>
 </pre>
@@ -321,7 +321,7 @@ $element['meat'] = array(
 <p>The <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>array_merge</span> is just to preserve the current #process callbacks. Here is the callback itself:</p>
 
 <pre><code>
-function poutine_maker_ignore_parent(&amp;$form, &amp;$form_state, $complete) {
+function poutine_maker_ignore_parent(&$form, &$form_state, $complete) {
   array_pop($form['#parents']);
   return $form;
 }
@@ -333,8 +333,8 @@ function poutine_maker_ignore_parent(&amp;$form, &amp;$form_state, $complete) {
 <pre><code>
 $form = array(
   ...
-  '#array_parents' =&gt; array('field_poutine_meat', 'und', 0, 'meat'),
-  '#parents' =&gt; array('field_poutine_meat', 'und', 0, 'meat'),
+  '#array_parents' => array('field_poutine_meat', 'und', 0, 'meat'),
+  '#parents' => array('field_poutine_meat', 'und', 0, 'meat'),
   ...
 );
 </code>
