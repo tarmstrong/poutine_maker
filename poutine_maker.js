@@ -3,7 +3,7 @@
  *
  * Render a poutine maker field as a canvas with all the ingredients
  * in a circle around the name of the poutine. Animate it just because
- * we can.
+ * we can. Add a fork because that's hilarious.
  */
 (function ($) {
 function PoutineMakerAnimation(canvas) {
@@ -89,8 +89,6 @@ function PoutineMakerAnimation(canvas) {
           offsetDegrees = animateCount * (Math.PI/(1000/5));
           radius = 190.0 + 30*Math.sin(count/10.0);
 
-          t.drawFork();
-
           origin = (function (w, h) {
             return {
               x: w/2.0,
@@ -128,6 +126,8 @@ function PoutineMakerAnimation(canvas) {
             t.context.fillStyle = "#fff";
             t.context.fillText("This is a vegetarian poutine!", 5, t.size.height-15);
           }
+
+          t.drawFork();
         }(count));
         count += 1;
         setTimeout(loop, 1000/60.0);
