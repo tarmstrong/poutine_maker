@@ -282,59 +282,33 @@ function poutine_maker_field_formatter_view($entity_type, $entity, $field, $inst
  * $item.
  */
 function poutine_maker_format_field($item) {
+  drupal_add_js(drupal_get_path('module', 'poutine_maker') . '/poutine_maker.js');
   $element = array(
     '#type' => 'container',
     '#attributes' => array( 'class' => array( 'field-item') ),
   );
-  $element['name'] = array(
-    'label' => array(
-      '#type' => 'container',
-      '#attributes' => array( 'class' => array( 'field-label' )),
-      'text' => array(
-        '#markup' => t('Name'),
-      ),
-    ),
-    'item' => array(
-      '#type' => 'container',
-      '#attributes' => array( 'class' => array( 'field-item') ),
-      'text' => array(
-        '#markup' => $item['name'],
-      ),
-    ),
-  );
-  if ($item['vegetarian']) {
-    $element['vegetarian'] = array(
-      'item' => array(
-        '#type' => 'container',
-        '#attributes' => array( 'class' => array( 'field-item') ),
-        'text' => array(
-          '#markup' => t('<strong>This is a vegetarian poutine</strong>'),
-        ),
-      ),
-    );
-  }
-  $toppings_list = array();
+  $canvas_id = 'poutine_maker_' . md5(rand());
+  $canvas = '<canvas width="500" height="500" class="poutine-maker-animation" id="' . $canvas_id . '"></canvas>';
   foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
     if ($item[$topping_machine] == 1) {
-      $toppings_list[] = t($topping);
+      $toppings_list[] = $topping;
+      $toppings_list_img[] = url(drupal_get_path('module', 'poutine_maker') . '/' . $topping_machine . '.jpg');
     }
   }
-  $toppings_rendered_list = implode(', ', $toppings_list);
-  $element['toppings'] = array(
-    'label' => array(
-      '#type' => 'container',
-      '#attributes' => array( 'class' => array( 'field-label' )),
-      'text' => array(
-        '#markup' => t('Ingredients'),
-      ),
-    ),
-    'item' => array(
-      '#type' => 'container',
-      '#attributes' => array( 'class' => array( 'field-item') ),
-      'text' => array(
-        '#markup' => $toppings_rendered_list,
-      ),
-    ),
+
+  // Give the <canvas> animation some data to work with.
+  $json = array(
+    'title' => $item['name'],
+    'toppings' => $toppings_list_img,
+    'bg' => url(drupal_get_path('module', 'poutine_maker') . '/poutine_background.jpg'),
+    'vegetarian' => ($item['vegetarian'] == 1),
+    'fork' => url(drupal_get_path('module', 'poutine_maker') . '/fork.png'),
+  );
+  $js = 'window[\'' . $canvas_id . '\'] = ' . json_encode($json) . ';';
+  drupal_add_js($js, 'inline');
+
+  $element['text'] = array (
+    '#markup' => $canvas,
   );
   return $element;
 }
