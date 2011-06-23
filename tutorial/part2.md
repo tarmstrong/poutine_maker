@@ -210,6 +210,10 @@ The only thing left to do is to return the renderable element item. Remember tha
       return $element;
     }
 
+Here is the formatter in action:
+
+![Formatter in action](poutine_formatter_inaction.png)
+
 ## A More Advanced Formatter
 
 Now, I'm not a boring person, so I wanted to format my field data in an exciting way using the HTML Canvas API. Here's the PHP code that creates the canvas tag:
