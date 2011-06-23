@@ -63,7 +63,9 @@ function PoutineMakerAnimation(canvas) {
     var x, y;
     x = this.mouseX - this.fork.width/2.0;
     y = this.mouseY - this.fork.height/2.0;
-    this.context.drawImage(this.fork, x, y);
+    if (x > 0 && y > 0) {
+      this.context.drawImage(this.fork, x, y);
+    }
   };
 
   this.animate = function () {
