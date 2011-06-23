@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-cat head.html > part1.html
-markdown part1.md >> part1.html
-sed -i 's|=&gt;|=>|g' part1.html
-sed -i 's|&amp;|\&|g' part1.html
-cat part1.html | perl -pe 's|(<h.>.*?)<code>(.*?)</code>|\1\2|' > part1.html.bk1
-cat part1.html.bk1 | perl -pe 's|<code>(.*?)</code>|<span style='\''font-family:"Courier New","DejaVu Sans Mono", monospace'\''>\1</span>|g' > part1.html.bk2
-cat part1.html.bk2 | sed 's|code>|code>\n|g' > part1.html
+part=$1
+echo $1
+cat head.html > $part.html
+markdown $part.md >> $part.html
+sed -i 's|=&gt;|=>|g' $part.html
+sed -i 's|&amp;|\&|g' $part.html
+cat $part.html | perl -pe 's|(<h.>.*?)<code>(.*?)</code>|\1\2|' > $part.html.bk1
+cat $part.html.bk1 | perl -pe 's|<code>(.*?)</code>|<span style='\''font-family:"Courier New","DejaVu Sans Mono", monospace'\''>\1</span>|g' > $part.html.bk2
+cat $part.html.bk2 | sed 's|code>|code>\n|g' > $part.html

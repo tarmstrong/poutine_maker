@@ -324,3 +324,14 @@ See [poutine_maker][poutine_maker] on GitHub for a full example. And, as always,
 * [Form API](http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7)
 * [Pro Drupal Development](http://www.drupalbook.com/)
 * [Drupal 7 Module Development](https://www.packtpub.com/drupal-7-module-development/book)
+
+[poutine_wikipedia]: http://en.wikipedia.org/wiki/Poutine
+[date_field_info]: http://api.lullabot.com/date_field_info/7
+[date]: http://drupal.org/project/date
+[states]: http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7#states
+[formapi]: http://api.drupal.org/api/drupal/developer--topics--forms_api_reference.html/7
+[widget_form_docs]: http://api.drupal.org/api/drupal/modules--field--field.api.php/function/hook_field_widget_form/7
+[poutine_maker]: https://github.com/tarmstrong/poutine_maker
+[schema]: http://drupal.org/developing/api/schema
+[part1]: http://evolvingweb.ca/story/poutine-maker-introduction-field-api-drupal-7-part-1 
+[drupal_poutine]: http://drupal.org/sandbox/tarmstrong/1188140
