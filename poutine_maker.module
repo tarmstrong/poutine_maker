@@ -368,7 +368,7 @@ function poutine_maker_format_canvas_field($item) {
   foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
     if ($item[$topping_machine] == 1) {
       $toppings_list[] = $topping;
-      $toppings_list_img[] = drupal_get_path('module', 'poutine_maker') . '/' . $topping_machine . '.jpg';
+      $toppings_list_img[] = '/' . drupal_get_path('module', 'poutine_maker') . '/' . $topping_machine . '.jpg';
     }
   }
 
@@ -376,10 +376,11 @@ function poutine_maker_format_canvas_field($item) {
   $json = array(
     'title' => $item['name'],
     'toppings' => $toppings_list_img,
-    'bg' => drupal_get_path('module', 'poutine_maker') . '/poutine_background.jpg',
+    'bg' => '/' . drupal_get_path('module', 'poutine_maker') . '/poutine_background.jpg',
     'vegetarian' => ($item['vegetarian'] == 1),
-    'fork' => drupal_get_path('module', 'poutine_maker') . '/fork.png',
+    'fork' => '/' . drupal_get_path('module', 'poutine_maker') . '/fork.png',
   );
+
   $js = 'window[\'' . $canvas_id . '\'] = ' . json_encode($json) . ';';
   drupal_add_js($js, 'inline');
 
