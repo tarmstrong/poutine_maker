@@ -11,13 +11,23 @@ So far, we've:
 
 And by the end of this blog post, we'll have:
 
-1. Created a validator to detect input errors,
-2. Defined how our widget should handle any detected errors; and
-3. Created a formatter to display the saved values.
+<ol start="5">
+<li>Created a validator to detect input errors,</li>
+<li>Defined how our widget should handle any detected errors; and</li>
+<li>Created a formatter to display the saved values.</li>
+</ol>
+
+If you're confused about the terminology, remember this:
+
+* A **field** is a data type. For example, you could have a colour field that only stores colours.
+* A **widget** is a method of entering data into the field. For example, you could use a colour picker to let users enter colours. Or, you could let the user type the colour name into a textbox.
+* A **formatter** is a way to display the stored field data. For example, you could display a chosen colour by displaying the name of the colour, or an image of that colour.
+
+It's important to remember that you can define widgets and formatters on existing fields. Not only that, but you can use existing formatters and widgets for new fields.
 
 ## The Challenge
 
-Those who missed the [first part][part1] of this series will want to know why I'm defining all this custom field nonsense. The challenge I gave myself in part 1 was to make a multi-value Poutine Maker field. I wanted people to be able to design their own Poutines. Poutine Maker was the result.
+Those who missed the [first part][part1] of this series will want to know why I'm defining all this custom field stuff. The challenge I gave myself in part 1 was to make a multi-value Poutine Maker field. I wanted people to be able to design their own Poutines. Poutine Maker was the result.
 
 ## Field API Hooks
 
@@ -35,7 +45,7 @@ In this part of the tutorial, I'll cover the following hooks:
 * `hook_field_formatter_info()` tells Drupal about your custom field formatters.
 * `hook_field_formatter_view()` tells Drupal how to display the data in your field to the user.
 
-## Create a field validator with hook\_field\_validate()
+## Step 5: Create a field validator with hook\_field\_validate()
 
 Before we get to the field formatter, we should write a field validator so we can be sure that the data entered by the user is good enough to save.
 
@@ -73,7 +83,7 @@ This code checks to see if any of the values in our field have tofu and sweet\_p
 
 'poutine\_maker\_invalid\_full' is an error code chosen by you. This is used because `hook_field_widget_error()` can handle errors differently based on what *kind* of error it is.
 
-`$errors` is the way `poutine_maker_field_validate()` will communicate with `poutine_maker_field_widget_error()`, so you include an error message, and any other information necessary for `hook_field_widget_error()` to handle the error gracefully.
+`poutine_maker_field_validate()` will communicate with `poutine_maker_field_widget_error()` using the `$errors` array. `$errors` is a container for all the useful information about the errors in a field widget. This is where you store error messages and indicate which element the error occurred on.
 
 Let's take a look at the `hook_field_widget_error()` code:
 
@@ -91,7 +101,7 @@ Let's take a look at the `hook_field_widget_error()` code:
 
 The switch statement is just to check what type of error it is. In this case we only have one type of possible error, but I've included the switch statement anyways to illustrate the flexibility.
 
-## Step 1: Define your field formatter with hook\_field\_formatter\_info()
+## Step 6: Define your field formatter with hook\_field\_formatter\_info()
 
 `hook_field_formatter_info()` tells Drupal about the formatters your module is making available. Here's an example:
 
@@ -112,7 +122,7 @@ Now that we've defined a formatter, we can see the choice on the 'Manage Display
 
 ![New field](poutine_order_new_field.png)
 
-## Step 2: Define how your field should be formatted with hook\_field\_formatter\_view()
+## Step 7: Define how your field should be formatted with hook\_field\_formatter\_view()
 
 Now we just need to give the Field API a renderable array to display to the user. I like to have one generic implementation of `hook_field_formatter_view()` that delegates construction of the array to a separate function. This makes it easy to add formatters.
 
@@ -130,9 +140,7 @@ Here is `hook_field_formatter_view()`:
 
 Notice that this function returns an $element array, keyed by $delta (each $delta refers to an item in a multi-value field). I render each element item in a separate function called `poutine_maker_format_field()`. This is not a hook, but rather a helper function to keep my `hook_field_formatter_view()` implementation clean and short.
 
-Here is my `poutine_maker_format_field()` function. It's simple and boring and ugly, but it demonstrates the basic concept.
-
-It starts out with a 'container' element. This is similar to the Form API's fieldset type.
+Here is my `poutine_maker_format_field()` function. It starts out with a 'container' element. This is similar to the Form API's fieldset type.
 
     function poutine_maker_format_field($item) {
       $element = array(
@@ -143,7 +151,6 @@ It starts out with a 'container' element. This is similar to the Form API's fiel
       // ... 
 
 Next, I add the name of the poutine:
-
 
     $element['name'] = array(
       'label' => array(
@@ -216,7 +223,7 @@ Here is the formatter in action:
 
 ## A More Advanced Formatter
 
-Now, I'm not a boring person, so I wanted to format my field data in an exciting way using the HTML Canvas API. Here's the PHP code that creates the canvas tag:
+The basic formatter works, but I wanted to format my field data in an exciting way using the HTML Canvas API. Here's the PHP code that creates the canvas tag:
 
 The first step is to add my Javascript file to the page.
 
@@ -280,7 +287,11 @@ There's a ton of Javascript involved here that I won't get into. The gist of it 
       );
     }
 
-Click here for the demo. This demo should work in Chrome and Firefox 3.6+.
+Click the below image for the demo. This demo should work in Chrome and Firefox 4+.
+
+<a href="http://demo">
+![Poutine Formatter Demo](awesome_best_poutine_cropped.png)
+</a>
 
 ## Review
 

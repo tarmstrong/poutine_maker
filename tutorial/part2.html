@@ -31,15 +31,25 @@
 
 <p>And by the end of this blog post, we'll have:</p>
 
-<ol>
+<ol start="5">
 <li>Created a validator to detect input errors,</li>
 <li>Defined how our widget should handle any detected errors; and</li>
 <li>Created a formatter to display the saved values.</li>
 </ol>
 
+<p>If you're confused about the terminology, remember this:</p>
+
+<ul>
+<li>A <strong>field</strong> is a data type. For example, you could have a colour field that only stores colours.</li>
+<li>A <strong>widget</strong> is a method of entering data into the field. For example, you could use a colour picker to let users enter colours. Or, you could let the user type the colour name into a textbox.</li>
+<li>A <strong>formatter</strong> is a way to display the stored field data. For example, you could display a chosen colour by displaying the name of the colour, or an image of that colour.</li>
+</ul>
+
+<p>It's important to remember that you can define widgets and formatters on existing fields. Not only that, but you can use existing formatters and widgets for new fields.</p>
+
 <h2>The Challenge</h2>
 
-<p>Those who missed the <a href="http://evolvingweb.ca/story/poutine-maker-introduction-field-api-drupal-7-part-1">first part</a> of this series will want to know why I'm defining all this custom field nonsense. The challenge I gave myself in part 1 was to make a multi-value Poutine Maker field. I wanted people to be able to design their own Poutines. Poutine Maker was the result.</p>
+<p>Those who missed the <a href="http://evolvingweb.ca/story/poutine-maker-introduction-field-api-drupal-7-part-1">first part</a> of this series will want to know why I'm defining all this custom field stuff. The challenge I gave myself in part 1 was to make a multi-value Poutine Maker field. I wanted people to be able to design their own Poutines. Poutine Maker was the result.</p>
 
 <h2>Field API Hooks</h2>
 
@@ -61,7 +71,7 @@
 <li><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_formatter_view()</span> tells Drupal how to display the data in your field to the user.</li>
 </ul>
 
-<h2>Create a field validator with hook_field_validate()</h2>
+<h2>Step 5: Create a field validator with hook_field_validate()</h2>
 
 <p>Before we get to the field formatter, we should write a field validator so we can be sure that the data entered by the user is good enough to save.</p>
 
@@ -102,7 +112,7 @@ function poutine_maker_field_validate($entity_type, $entity,
 
 <p>'poutine_maker_invalid_full' is an error code chosen by you. This is used because <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_error()</span> can handle errors differently based on what <em>kind</em> of error it is.</p>
 
-<p><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$errors</span> is the way <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_validate()</span> will communicate with <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_widget_error()</span>, so you include an error message, and any other information necessary for <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_error()</span> to handle the error gracefully.</p>
+<p><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_validate()</span> will communicate with <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_widget_error()</span> using the <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$errors</span> array. <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>$errors</span> is a container for all the useful information about the errors in a field widget. This is where you store error messages and indicate which element the error occurred on.</p>
 
 <p>Let's take a look at the <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_error()</span> code:</p>
 
@@ -122,7 +132,7 @@ function poutine_maker_field_widget_error($element, $error,
 
 <p>The switch statement is just to check what type of error it is. In this case we only have one type of possible error, but I've included the switch statement anyways to illustrate the flexibility.</p>
 
-<h2>Step 1: Define your field formatter with hook_field_formatter_info()</h2>
+<h2>Step 6: Define your field formatter with hook_field_formatter_info()</h2>
 
 <p><span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_formatter_info()</span> tells Drupal about the formatters your module is making available. Here's an example:</p>
 
@@ -146,7 +156,7 @@ function poutine_maker_field_formatter_info() {
 
 <p><img src="poutine_order_new_field.png" alt="New field" title="" /></p>
 
-<h2>Step 2: Define how your field should be formatted with hook_field_formatter_view()</h2>
+<h2>Step 7: Define how your field should be formatted with hook_field_formatter_view()</h2>
 
 <p>Now we just need to give the Field API a renderable array to display to the user. I like to have one generic implementation of <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_formatter_view()</span> that delegates construction of the array to a separate function. This makes it easy to add formatters.</p>
 
@@ -166,9 +176,7 @@ function poutine_maker_field_formatter_view($entity_type, $entity, $field,
 
 <p>Notice that this function returns an $element array, keyed by $delta (each $delta refers to an item in a multi-value field). I render each element item in a separate function called <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_format_field()</span>. This is not a hook, but rather a helper function to keep my <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_formatter_view()</span> implementation clean and short.</p>
 
-<p>Here is my <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_format_field()</span> function. It's simple and boring and ugly, but it demonstrates the basic concept.</p>
-
-<p>It starts out with a 'container' element. This is similar to the Form API's fieldset type.</p>
+<p>Here is my <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_format_field()</span> function. It starts out with a 'container' element. This is similar to the Form API's fieldset type.</p>
 
 <pre><code>
 function poutine_maker_format_field($item) {
@@ -265,7 +273,7 @@ if ($item['vegetarian']) {
 
 <h2>A More Advanced Formatter</h2>
 
-<p>Now, I'm not a boring person, so I wanted to format my field data in an exciting way using the HTML Canvas API. Here's the PHP code that creates the canvas tag:</p>
+<p>The basic formatter works, but I wanted to format my field data in an exciting way using the HTML Canvas API. Here's the PHP code that creates the canvas tag:</p>
 
 <p>The first step is to add my Javascript file to the page.</p>
 
@@ -347,7 +355,11 @@ function poutine_maker_field_formatter_info() {
 </code>
 </pre>
 
-<p>Click here for the demo. This demo should work in Chrome and Firefox 3.6+.</p>
+<p>Click the below image for the demo. This demo should work in Chrome and Firefox 4+.</p>
+
+<p><a href="http://demo">
+<img src="awesome_best_poutine_cropped.png" alt="Poutine Formatter Demo" title="" />
+</a></p>
 
 <h2>Review</h2>
 
