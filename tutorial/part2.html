@@ -83,7 +83,7 @@
 
 <p><img src="tofu%20validation%20error.png" alt="Tofu error" title="" /></p>
 
-<p>There are two main hooks used to enforce field validation. The first of the two hooks is <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_validate()</span>, which simply checks the field's values for errors and sets any error messages in the $error array.</p>
+<p>There are two main hooks used to enforce field validation. The first of the two hooks is <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_validate()</span>, which simply checks the field's values for errors and sets any error messages in the $errors array.</p>
 
 <pre><code>
 function poutine_maker_field_validate($entity_type, $entity,
@@ -108,7 +108,7 @@ function poutine_maker_field_validate($entity_type, $entity,
 </code>
 </pre>
 
-<p>This code checks to see if any of the values in our field have tofu and sweet_potato checked off. If so, we set an error called 'poutine_maker_invalid_full' with an error message. <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_widget_error()</span> is necessary for this error message to actually be rendered.</p>
+<p>This code looks at all the poutines entered in our poutine field, and figures out if any of them have selected both tofu and sweet potato. If so, we set an error called 'poutine_maker_invalid_full' with an error message. <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>poutine_maker_field_widget_error()</span> is necessary for this error message to actually be rendered.</p>
 
 <p>'poutine_maker_invalid_full' is an error code chosen by you. This is used because <span style='font-family:"Courier New","DejaVu Sans Mono", monospace'>hook_field_widget_error()</span> can handle errors differently based on what <em>kind</em> of error it is.</p>
 

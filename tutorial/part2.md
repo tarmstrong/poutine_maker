@@ -57,7 +57,7 @@ However, that's kind of gross, so I've designed a validator to prevent people fr
 
 ![Tofu error](tofu%20validation%20error.png)
 
-There are two main hooks used to enforce field validation. The first of the two hooks is `hook_field_validate()`, which simply checks the field's values for errors and sets any error messages in the $error array.
+There are two main hooks used to enforce field validation. The first of the two hooks is `hook_field_validate()`, which simply checks the field's values for errors and sets any error messages in the $errors array.
 
     function poutine_maker_field_validate($entity_type, $entity,
               $field, $instance, $langcode, $items, &$errors) {
@@ -79,7 +79,7 @@ There are two main hooks used to enforce field validation. The first of the two 
       }
     }
 
-This code checks to see if any of the values in our field have tofu and sweet\_potato checked off. If so, we set an error called 'poutine\_maker\_invalid\_full' with an error message. `poutine_maker_field_widget_error()` is necessary for this error message to actually be rendered.
+This code looks at all the poutines entered in our poutine field, and figures out if any of them have selected both tofu and sweet potato. If so, we set an error called 'poutine\_maker\_invalid\_full' with an error message. `poutine_maker_field_widget_error()` is necessary for this error message to actually be rendered.
 
 'poutine\_maker\_invalid\_full' is an error code chosen by you. This is used because `hook_field_widget_error()` can handle errors differently based on what *kind* of error it is.
 
