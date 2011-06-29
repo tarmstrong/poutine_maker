@@ -289,7 +289,7 @@ There's a ton of Javascript involved here that I won't get into. The gist of it 
 
 Click the below image for the demo. This demo should work in Chrome and Firefox 4+.
 
-<a href="http://demo">
+<a href="http://poutinemaker.evolvingweb.ca/node/1">
 ![Poutine Formatter Demo](awesome_best_poutine_cropped.png)
 </a>
 
