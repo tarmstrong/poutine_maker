@@ -59,12 +59,6 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
   // attaching it to an entity.
   $field_name = $instance['field_name'];
 
-  // $process is a callback that we will attach to fieldsets in order
-  // to 'flatten' the form values. This is so we can store
-  // nested values in a 'flat' DB table.
-  $fieldset_info = element_info('fieldset');
-  $process = array_merge($fieldset_info['#process'], array('poutine_maker_ignore_parent'));
-
   // Is this field instance required?
   // We can use this $required value to make sub-elements of the
   // widget form required.
@@ -108,7 +102,6 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
     $element['meat'] = array(
       '#title' => t('Meat'),
       '#type' => 'fieldset',
-      '#process' => $process,
 
       // the meat fieldset should only be visible if
       // the vegetarian checkbox is not checked.
@@ -134,7 +127,6 @@ function poutine_maker_field_widget_form(&$form, &$form_state, $field, $instance
   $element['toppings'] = array(
     '#title' => t('Toppings'),
     '#type' => 'fieldset',
-    '#process' => $process,
   );
 
   // Create a checkbox item for each topping on the menu
@@ -160,17 +152,6 @@ function _poutine_maker_make_jquery_selector($field_name, $langcode, $delta, $it
 }
 
 /**
- * Process callback to remove one level of parentage
- *
- * poutine_maker_ignore_parent() causes the form values to be 'flattened' before being saved into
- * the database table.
- */
-function poutine_maker_ignore_parent(&$form, &$form_state, $complete) {
-  array_pop($form['#parents']);
-  return $form;
-}
-
-/**
  * Implements hook_field_is_empty().
  *
  * poutine_maker_field_is_empty() lets Drupal know whether or not to process input
@@ -179,8 +160,13 @@ function poutine_maker_ignore_parent(&$form, &$form_state, $complete) {
  */
 function poutine_maker_field_is_empty($item, $field) {
   $has_stuff = FALSE;
-  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
-    if (isset($item[$topping_machine]) && $item[$topping_machine] == 1) {
+  foreach (poutine_maker_toppings_veg() as $topping_machine=>$topping) {
+    if (isset($item[$topping_machine]) && $item['toppings'][$topping_machine] == 1) {
+      $has_stuff = TRUE;
+    }
+  }
+  foreach (poutine_maker_toppings_meat() as $topping_machine=>$topping) {
+    if (isset($item[$topping_machine]) && $item['meat'][$topping_machine] == 1) {
       $has_stuff = TRUE;
     }
   }
@@ -329,8 +315,13 @@ function poutine_maker_format_default_field($item) {
     );
   }
   $toppings_list = array();
-  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
-    if ($item[$topping_machine] == 1) {
+  foreach (poutine_maker_toppings_veg() as $topping_machine=>$topping) {
+    if ($item['toppings'][$topping_machine] == 1) {
+      $toppings_list[] = t($topping);
+    }
+  }
+  foreach (poutine_maker_toppings_meat() as $topping_machine=>$topping) {
+    if ($item['meat'][$topping_machine] == 1) {
       $toppings_list[] = t($topping);
     }
   }
@@ -365,8 +356,16 @@ function poutine_maker_format_canvas_field($item) {
   );
   $canvas_id = 'poutine_maker_' . md5(rand());
   $canvas = '<canvas width="500" height="500" class="poutine-maker-animation" id="' . $canvas_id . '"></canvas>';
-  foreach (poutine_maker_toppings() as $topping_machine=>$topping) {
-    if ($item[$topping_machine] == 1) {
+
+  foreach (poutine_maker_toppings_veg() as $topping_machine=>$topping) {
+    if ($item['toppings'][$topping_machine] == 1) {
+      $toppings_list[] = $topping;
+      $toppings_list_img[] = '/' . drupal_get_path('module', 'poutine_maker') . '/' . $topping_machine . '.jpg';
+    }
+  }
+
+  foreach (poutine_maker_toppings_meat() as $topping_machine=>$topping) {
+    if ($item['meat'][$topping_machine] == 1) {
       $toppings_list[] = $topping;
       $toppings_list_img[] = '/' . drupal_get_path('module', 'poutine_maker') . '/' . $topping_machine . '.jpg';
     }
@@ -388,4 +387,44 @@ function poutine_maker_format_canvas_field($item) {
     '#markup' => $canvas,
   );
   return $element;
+}
+
+/**
+ * Implements hook_field_presave().
+ */
+function poutine_maker_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  if ($field['type'] == 'poutine_maker_poutine') {
+    foreach ($items as $delta => &$item) {
+      $new_item = array();
+      $new_item['name'] = $item['name'];
+      $new_item['vegetarian'] = $item['vegetarian'];
+      foreach(poutine_maker_toppings_meat() as $topping_machine => $topping) {
+        $new_item[$topping_machine] = $item['meat'][$topping_machine];
+      }
+      foreach(poutine_maker_toppings_veg() as $topping_machine => $topping) {
+        $new_item[$topping_machine] = $item['toppings'][$topping_machine];
+      }
+      $item = $new_item;
+    }
+  }
+}
+
+/**
+ * Implements hook_field_load().
+ */
+function poutine_maker_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+  foreach ($entities as $id => $entity) {
+    foreach ($items[$id] as $delta => &$item) {
+      $new_item = array();
+      $new_item['name'] = $item['name'];
+      $new_item['vegetarian'] = $item['vegetarian'];
+      foreach(poutine_maker_toppings_meat() as $topping_machine => $topping) {
+        $new_item['meat'][$topping_machine] = $item[$topping_machine];
+      }
+      foreach(poutine_maker_toppings_veg() as $topping_machine => $topping) {
+        $new_item['toppings'][$topping_machine] = $item[$topping_machine];
+      }
+      $item = $new_item;
+    }
+  }
 }
